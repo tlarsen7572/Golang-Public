@@ -1,0 +1,13 @@
+{
+  "InstallPath": "C:\\Program Files\\Alteryx",
+  "ProgramDataPath": "C:\\ProgramData\\Alteryx",
+  "UserFolders": [
+    "C:\\Users\\tlarsen"
+  ],
+  "HttpPort": "35012",
+  "BrowseFolderRoots": [
+    "C:\\",
+    "D:\\"
+  ],
+  "LogPath": ".\\log.txt"
+}

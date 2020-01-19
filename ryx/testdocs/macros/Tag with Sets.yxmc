@@ -1,0 +1,435 @@
+<?xml version="1.0"?>
+<AlteryxDocument yxmdVer="2019.3">
+  <Nodes>
+    <Node ToolID="1">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.MacroInput.MacroInput">
+        <Position x="222" y="270" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <UseFileInput value="False" />
+          <Name>Input1</Name>
+          <Abbrev />
+          <ShowFieldMap value="False" />
+          <Optional value="False" />
+          <TextInput>
+            <Configuration>
+              <NumRows value="11" />
+              <Fields>
+                <Field name="RCLNT" />
+                <Field name="RYEAR" />
+                <Field name="DOCNR" />
+                <Field name="RLDNR" />
+                <Field name="RBUKRS" />
+                <Field name="DOCLN" />
+                <Field name="RACCT" />
+                <Field name="HSL" />
+              </Fields>
+              <Data>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000001</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000001</c>
+                  <c>A1</c>
+                  <c>12.00</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000001</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000002</c>
+                  <c>G7</c>
+                  <c>-12.00</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000002</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000001</c>
+                  <c>A3</c>
+                  <c>22.10</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000002</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000002</c>
+                  <c>A8</c>
+                  <c>1.30</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000002</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000003</c>
+                  <c>B2</c>
+                  <c>-23.40</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000003</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000001</c>
+                  <c>C2</c>
+                  <c>14.20</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000003</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000002</c>
+                  <c>I4</c>
+                  <c>-14.20</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000004</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000001</c>
+                  <c>J1</c>
+                  <c>10.20</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000004</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000002</c>
+                  <c>Z8</c>
+                  <c>3.50</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000004</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000003</c>
+                  <c>K9</c>
+                  <c>-5.00</c>
+                </r>
+                <r>
+                  <c>010</c>
+                  <c>2019</c>
+                  <c>0000000004</c>
+                  <c>0L</c>
+                  <c>0001</c>
+                  <c>000004</c>
+                  <c>M3</c>
+                  <c>-8.70</c>
+                </r>
+              </Data>
+            </Configuration>
+          </TextInput>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>FAGLFLEXA</AnnotationText>
+          <DefaultAnnotationText />
+          <Left value="True" />
+        </Annotation>
+        <MetaInfo connection="Output">
+          <RecordInfo>
+            <Field name="RCLNT" size="3" source="TextInput:" type="String" />
+            <Field name="RYEAR" source="TextInput:" type="Int16" />
+            <Field name="DOCNR" size="10" source="TextInput:" type="String" />
+            <Field name="RLDNR" size="2" source="TextInput:" type="String" />
+            <Field name="RBUKRS" size="4" source="TextInput:" type="String" />
+            <Field name="DOCLN" size="6" source="TextInput:" type="String" />
+            <Field name="RACCT" size="2" source="TextInput:" type="String" />
+            <Field name="HSL" source="TextInput:" type="Double" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxMacroInput" />
+    </Node>
+    <Node ToolID="2">
+      <GuiSettings Plugin="AlteryxGuiToolkit.Questions.Tab.Tab">
+        <Position x="0" y="0" width="59" height="59" />
+      </GuiSettings>
+      <Properties>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+    </Node>
+    <Node ToolID="3">
+      <GuiSettings Plugin="AlteryxGuiToolkit.Questions.ControlParam.ControlParam">
+        <Position x="162" y="66" width="59" height="59" />
+      </GuiSettings>
+      <Properties>
+        <Configuration />
+        <Annotation DisplayMode="0">
+          <Name>Filter</Name>
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+    </Node>
+    <Node ToolID="4">
+      <GuiSettings Plugin="AlteryxGuiToolkit.Questions.ControlParam.ControlParam">
+        <Position x="162" y="150" width="59" height="59" />
+      </GuiSettings>
+      <Properties>
+        <Configuration />
+        <Annotation DisplayMode="0">
+          <Name>SetName</Name>
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+    </Node>
+    <Node ToolID="5">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+        <Position x="318" y="270" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Expression>%Question.ControlParam.Filter%</Expression>
+          <Mode>Custom</Mode>
+          <Simple>
+            <Operator>=</Operator>
+            <Operands>
+              <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+              <DateType>fixed</DateType>
+              <PeriodDate>2019-10-18 05:21:35</PeriodDate>
+              <PeriodType>
+              </PeriodType>
+              <PeriodCount>0</PeriodCount>
+              <StartDate>2019-10-18 05:21:35</StartDate>
+              <EndDate>2019-10-18 05:21:35</EndDate>
+              <Operand>
+              </Operand>
+            </Operands>
+          </Simple>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>Filter</AnnotationText>
+          <DefaultAnnotationText>%Question.ControlParam.Filter%</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+        <MetaInfo connection="True">
+          <RecordInfo>
+            <Field name="RCLNT" size="3" source="TextInput:" type="String" />
+            <Field name="RYEAR" source="TextInput:" type="Int16" />
+            <Field name="DOCNR" size="10" source="TextInput:" type="String" />
+            <Field name="RLDNR" size="2" source="TextInput:" type="String" />
+            <Field name="RBUKRS" size="4" source="TextInput:" type="String" />
+            <Field name="DOCLN" size="6" source="TextInput:" type="String" />
+            <Field name="RACCT" size="2" source="TextInput:" type="String" />
+            <Field name="HSL" source="TextInput:" type="Double" />
+          </RecordInfo>
+        </MetaInfo>
+        <MetaInfo connection="False">
+          <RecordInfo>
+            <Field name="RCLNT" size="3" source="TextInput:" type="String" />
+            <Field name="RYEAR" source="TextInput:" type="Int16" />
+            <Field name="DOCNR" size="10" source="TextInput:" type="String" />
+            <Field name="RLDNR" size="2" source="TextInput:" type="String" />
+            <Field name="RBUKRS" size="4" source="TextInput:" type="String" />
+            <Field name="DOCLN" size="6" source="TextInput:" type="String" />
+            <Field name="RACCT" size="2" source="TextInput:" type="String" />
+            <Field name="HSL" source="TextInput:" type="Double" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+    </Node>
+    <Node ToolID="6">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Formula.Formula">
+        <Position x="414" y="270" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <FormulaFields>
+            <FormulaField expression="&quot;%Question.ControlParam.SetName%&quot;" field="Set Name" size="1073741823" type="V_WString" />
+          </FormulaFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>Set Name</AnnotationText>
+          <DefaultAnnotationText><![CDATA[Set Name = "%Question.ControlParam.SetName%"
+]]></DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+        <MetaInfo connection="Output">
+          <RecordInfo>
+            <Field name="RCLNT" size="3" source="TextInput:" type="String" />
+            <Field name="RYEAR" source="TextInput:" type="Int16" />
+            <Field name="DOCNR" size="10" source="TextInput:" type="String" />
+            <Field name="RLDNR" size="2" source="TextInput:" type="String" />
+            <Field name="RBUKRS" size="4" source="TextInput:" type="String" />
+            <Field name="DOCLN" size="6" source="TextInput:" type="String" />
+            <Field name="RACCT" size="2" source="TextInput:" type="String" />
+            <Field name="HSL" source="TextInput:" type="Double" />
+            <Field name="Set Name" size="1073741823" source="Formula: &quot;TEST1&quot;" type="V_WString" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFormula" />
+    </Node>
+    <Node ToolID="7">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.MacroOutput.MacroOutput">
+        <Position x="510" y="270" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Name>Output7</Name>
+          <Abbrev />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxMacroOutput" />
+    </Node>
+  </Nodes>
+  <Connections>
+    <Connection>
+      <Origin ToolID="1" Connection="Output" />
+      <Destination ToolID="5" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="5" Connection="True" />
+      <Destination ToolID="6" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="6" Connection="Output" />
+      <Destination ToolID="7" Connection="Input" />
+    </Connection>
+  </Connections>
+  <Properties>
+    <Memory default="True" />
+    <GlobalRecordLimit value="0" />
+    <TempFiles default="True" />
+    <Annotation on="True" includeToolName="False" />
+    <ConvErrorLimit value="10" />
+    <ConvErrorLimit_Stop value="False" />
+    <CancelOnError value="False" />
+    <DisableBrowse value="False" />
+    <EnablePerformanceProfiling value="False" />
+    <DisableAllOutput value="False" />
+    <ShowAllMacroMessages value="False" />
+    <ShowConnectionStatusIsOn value="True" />
+    <ShowConnectionStatusOnlyWhenRunning value="True" />
+    <ZoomLevel value="0" />
+    <LayoutType>Horizontal</LayoutType>
+    <Constants>
+      <Constant>
+        <Namespace>Question</Namespace>
+        <Name>ControlParam.Filter</Name>
+        <Value>[RACCT] = 'A1'</Value>
+        <IsNumeric value="False" />
+      </Constant>
+      <Constant>
+        <Namespace>Question</Namespace>
+        <Name>ControlParam.SetName</Name>
+        <Value>TEST1</Value>
+        <IsNumeric value="False" />
+      </Constant>
+    </Constants>
+    <MetaInfo>
+      <NameIsFileName value="True" />
+      <Name>Tag with Sets</Name>
+      <Description />
+      <RootToolName />
+      <ToolVersion />
+      <ToolInDb value="False" />
+      <CategoryName />
+      <SearchTags />
+      <Author />
+      <Company />
+      <Copyright />
+      <DescriptionLink actual="" displayed="" />
+      <Example>
+        <Description />
+        <File />
+      </Example>
+    </MetaInfo>
+    <Events>
+      <Enabled value="False" />
+    </Events>
+    <RuntimeProperties>
+      <Actions />
+      <Questions>
+        <Question>
+          <Type>Tab</Type>
+          <Description>Questions</Description>
+          <Name>Tab (2)</Name>
+          <ToolId value="2" />
+          <Questions>
+            <Question>
+              <Type>MacroInput</Type>
+              <Description />
+              <Name>Macro Input (1)</Name>
+              <ToolId value="1" />
+            </Question>
+            <Question>
+              <Type>ControlParam</Type>
+              <Description>Filter</Description>
+              <Name>Filter</Name>
+              <ToolId value="3" />
+            </Question>
+            <Question>
+              <Type>ControlParam</Type>
+              <Description>Set Name</Description>
+              <Name>SetName</Name>
+              <ToolId value="4" />
+            </Question>
+          </Questions>
+        </Question>
+      </Questions>
+      <ModuleType>Macro</ModuleType>
+      <MacroCustomHelp value="False" />
+      <MacroDynamicOutputFields value="False" />
+      <MacroImageStd value="39" />
+      <MacroInputs />
+      <MacroOutputs />
+      <BatchMacro>
+        <OutputMode>AllSame</OutputMode>
+        <ControlParams>
+          <ControlParam>
+            <Name>Filter</Name>
+            <Description>Filter</Description>
+          </ControlParam>
+          <ControlParam>
+            <Name>SetName</Name>
+            <Description>Set Name</Description>
+          </ControlParam>
+        </ControlParams>
+      </BatchMacro>
+      <Wiz_CustomHelp value="False" />
+      <Wiz_CustomGraphic value="False" />
+      <Wiz_ShowOutput value="True" />
+      <Wiz_OpenOutputTools>
+        <Tool ToolId="7" Selected="False" />
+      </Wiz_OpenOutputTools>
+      <Wiz_OutputMessage />
+      <Wiz_NoOutputFilesMessage />
+      <Wiz_ChainRunWizard />
+    </RuntimeProperties>
+  </Properties>
+</AlteryxDocument>

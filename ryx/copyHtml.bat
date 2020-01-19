@@ -1,0 +1,1 @@
+xcopy /i /e /Y ryx\html ..\..\..\..\bin\html

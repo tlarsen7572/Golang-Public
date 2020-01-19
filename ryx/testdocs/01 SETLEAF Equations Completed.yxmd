@@ -1,0 +1,818 @@
+<?xml version="1.0"?>
+<AlteryxDocument yxmdVer="2019.3">
+  <Nodes>
+    <Node ToolID="1">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.TextInput.TextInput">
+        <Position x="54" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <NumRows value="13" />
+          <Fields>
+            <Field name="MANDT" />
+            <Field name="SETCLASS" />
+            <Field name="SUBCLASS" />
+            <Field name="SETNAME" />
+            <Field name="LINEID" />
+            <Field name="VALSIGN" />
+            <Field name="VALOPTION" />
+            <Field name="VALFROM" />
+            <Field name="VALTO" />
+            <Field name="SEQNR" />
+          </Fields>
+          <Data>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST01</c>
+              <c>00001</c>
+              <c>I</c>
+              <c>EQ</c>
+              <c>A1</c>
+              <c />
+              <c>1</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST01</c>
+              <c>00002</c>
+              <c>E</c>
+              <c>EQ</c>
+              <c>E1</c>
+              <c />
+              <c>2</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST01</c>
+              <c>00003</c>
+              <c>I</c>
+              <c>BT</c>
+              <c>C0</c>
+              <c>L9</c>
+              <c>3</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST01</c>
+              <c>00004</c>
+              <c>E</c>
+              <c>BT</c>
+              <c>H0</c>
+              <c>J9</c>
+              <c>4</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST02</c>
+              <c>00001</c>
+              <c>I</c>
+              <c>LE</c>
+              <c>D1</c>
+              <c />
+              <c>1</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST02</c>
+              <c>00002</c>
+              <c>I</c>
+              <c>GT</c>
+              <c>W1</c>
+              <c />
+              <c>2</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST03</c>
+              <c>00001</c>
+              <c>I</c>
+              <c>GE</c>
+              <c>X1</c>
+              <c />
+              <c>1</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST03</c>
+              <c>00002</c>
+              <c>I</c>
+              <c>LT</c>
+              <c>C1</c>
+              <c />
+              <c>2</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST04</c>
+              <c>00001</c>
+              <c>I</c>
+              <c>CP</c>
+              <c>A*</c>
+              <c />
+              <c>1</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST04</c>
+              <c>00002</c>
+              <c>E</c>
+              <c>CP</c>
+              <c>+3</c>
+              <c />
+              <c>2</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST05</c>
+              <c>00001</c>
+              <c>I</c>
+              <c>NE</c>
+              <c>A1</c>
+              <c />
+              <c>1</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST06</c>
+              <c>00001</c>
+              <c>I</c>
+              <c>NB</c>
+              <c>A4</c>
+              <c>Z3</c>
+              <c>1</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST07</c>
+              <c>00001</c>
+              <c>I</c>
+              <c>NP</c>
+              <c>+1</c>
+              <c />
+              <c>1</c>
+            </r>
+          </Data>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>SETLEAF</AnnotationText>
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxTextInput" />
+    </Node>
+    <Node ToolID="4">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.TextInput.TextInput">
+        <Position x="54" y="138" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <NumRows value="7" />
+          <Fields>
+            <Field name="MANDT" />
+            <Field name="SETCLASS" />
+            <Field name="SUBCLASS" />
+            <Field name="SETNAME" />
+            <Field name="FIELDNAME" />
+          </Fields>
+          <Data>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST01</c>
+              <c>RACCT</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST02</c>
+              <c>RACCT</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST03</c>
+              <c>RACCT</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST04</c>
+              <c>RACCT</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST05</c>
+              <c>RACCT</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST06</c>
+              <c>RACCT</c>
+            </r>
+            <r>
+              <c>000</c>
+              <c>0000</c>
+              <c><![CDATA[ ]]></c>
+              <c>TEST07</c>
+              <c>RACCT</c>
+            </r>
+          </Data>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>SETHEADER</AnnotationText>
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxTextInput" />
+    </Node>
+    <Node ToolID="5">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.TextInput.TextInput">
+        <Position x="54" y="222" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <NumRows value="11" />
+          <Fields>
+            <Field name="RCLNT" />
+            <Field name="RYEAR" />
+            <Field name="DOCNR" />
+            <Field name="RLDNR" />
+            <Field name="RBUKRS" />
+            <Field name="DOCLN" />
+            <Field name="RACCT" />
+            <Field name="HSL" />
+          </Fields>
+          <Data>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000001</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000001</c>
+              <c>A1</c>
+              <c>12.00</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000001</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000002</c>
+              <c>G7</c>
+              <c>-12.00</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000002</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000001</c>
+              <c>A3</c>
+              <c>22.10</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000002</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000002</c>
+              <c>A8</c>
+              <c>1.30</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000002</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000003</c>
+              <c>B2</c>
+              <c>-23.40</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000003</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000001</c>
+              <c>C2</c>
+              <c>14.20</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000003</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000002</c>
+              <c>I4</c>
+              <c>-14.20</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000004</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000001</c>
+              <c>J1</c>
+              <c>10.20</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000004</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000002</c>
+              <c>Z8</c>
+              <c>3.50</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000004</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000003</c>
+              <c>K9</c>
+              <c>-5.00</c>
+            </r>
+            <r>
+              <c>010</c>
+              <c>2019</c>
+              <c>0000000004</c>
+              <c>0L</c>
+              <c>0001</c>
+              <c>000004</c>
+              <c>M3</c>
+              <c>-8.70</c>
+            </r>
+          </Data>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>FAGLFLEXA</AnnotationText>
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxTextInput" />
+    </Node>
+    <Node ToolID="6">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Join.Join">
+        <Position x="150" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration joinByRecordPos="False">
+          <JoinInfo connection="Left">
+            <Field field="MANDT" />
+            <Field field="SETCLASS" />
+            <Field field="SUBCLASS" />
+            <Field field="SETNAME" />
+          </JoinInfo>
+          <JoinInfo connection="Right">
+            <Field field="MANDT" />
+            <Field field="SETCLASS" />
+            <Field field="SUBCLASS" />
+            <Field field="SETNAME" />
+          </JoinInfo>
+          <SelectConfiguration>
+            <Configuration outputConnection="Join">
+              <OrderChanged value="False" />
+              <CommaDecimal value="False" />
+              <SelectFields>
+                <SelectField field="Right_MANDT" selected="False" rename="Right_MANDT" input="Right_" />
+                <SelectField field="Right_SETCLASS" selected="False" rename="Right_SETCLASS" input="Right_" />
+                <SelectField field="Right_SUBCLASS" selected="False" rename="Right_SUBCLASS" input="Right_" />
+                <SelectField field="Right_SETNAME" selected="False" rename="Right_SETNAME" input="Right_" />
+                <SelectField field="*Unknown" selected="True" />
+              </SelectFields>
+            </Configuration>
+          </SelectConfiguration>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxJoin" />
+    </Node>
+    <Node ToolID="12">
+      <GuiSettings>
+        <Position x="246" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration />
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings Macro="Calculate Filter Expression.yxmc" />
+    </Node>
+    <Node ToolID="13">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter">
+        <Position x="342" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Expression>[VALSIGN] = "I"</Expression>
+          <Mode>Simple</Mode>
+          <Simple>
+            <Operator>=</Operator>
+            <Field>VALSIGN</Field>
+            <Operands>
+              <IgnoreTimeInDateTime>True</IgnoreTimeInDateTime>
+              <DateType>fixed</DateType>
+              <PeriodDate>2019-10-18 05:18:54</PeriodDate>
+              <PeriodType>
+              </PeriodType>
+              <PeriodCount>0</PeriodCount>
+              <StartDate>2019-10-18 05:18:54</StartDate>
+              <EndDate>2019-10-18 05:18:54</EndDate>
+              <Operand>I</Operand>
+            </Operands>
+          </Simple>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <AnnotationText>Split I / E</AnnotationText>
+          <DefaultAnnotationText>[VALSIGN] = "I"</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter" />
+    </Node>
+    <Node ToolID="14">
+      <GuiSettings Plugin="AlteryxSpatialPluginsGui.Summarize.Summarize">
+        <Position x="438" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <SummarizeFields>
+            <SummarizeField field="MANDT" action="GroupBy" rename="MANDT" />
+            <SummarizeField field="SETCLASS" action="GroupBy" rename="SETCLASS" />
+            <SummarizeField field="SUBCLASS" action="GroupBy" rename="SUBCLASS" />
+            <SummarizeField field="SETNAME" action="GroupBy" rename="SETNAME" />
+            <SummarizeField field="Filter" action="Concat" rename="Filter">
+              <Concat_Start>(</Concat_Start>
+              <Separator><![CDATA[ || ]]></Separator>
+              <Concat_End>)</Concat_End>
+            </SummarizeField>
+          </SummarizeFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSummarize" />
+    </Node>
+    <Node ToolID="15">
+      <GuiSettings Plugin="AlteryxSpatialPluginsGui.Summarize.Summarize">
+        <Position x="438" y="138" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <SummarizeFields>
+            <SummarizeField field="MANDT" action="GroupBy" rename="MANDT" />
+            <SummarizeField field="SETCLASS" action="GroupBy" rename="SETCLASS" />
+            <SummarizeField field="SUBCLASS" action="GroupBy" rename="SUBCLASS" />
+            <SummarizeField field="SETNAME" action="GroupBy" rename="SETNAME" />
+            <SummarizeField field="Filter" action="Concat" rename="Filter">
+              <Concat_Start>(</Concat_Start>
+              <Separator><![CDATA[ && ]]></Separator>
+              <Concat_End>)</Concat_End>
+            </SummarizeField>
+          </SummarizeFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSummarize" />
+    </Node>
+    <Node ToolID="16">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Union.Union">
+        <Position x="534" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <ByName_ErrorMode>Error</ByName_ErrorMode>
+          <ByName_OutputMode>All</ByName_OutputMode>
+          <Mode>ByName</Mode>
+          <SetOutputOrder value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxUnion" />
+    </Node>
+    <Node ToolID="17">
+      <GuiSettings Plugin="AlteryxSpatialPluginsGui.Summarize.Summarize">
+        <Position x="630" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <SummarizeFields>
+            <SummarizeField field="MANDT" action="GroupBy" rename="MANDT" />
+            <SummarizeField field="SETCLASS" action="GroupBy" rename="SETCLASS" />
+            <SummarizeField field="SUBCLASS" action="GroupBy" rename="SUBCLASS" />
+            <SummarizeField field="SETNAME" action="GroupBy" rename="SETNAME" />
+            <SummarizeField field="Filter" action="Concat" rename="Filter">
+              <Concat_Start>(</Concat_Start>
+              <Separator><![CDATA[ && ]]></Separator>
+              <Concat_End>)</Concat_End>
+            </SummarizeField>
+          </SummarizeFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxSpatialPluginsEngine.dll" EngineDllEntryPoint="AlteryxSummarize" />
+    </Node>
+    <Node ToolID="18">
+      <GuiSettings>
+        <Position x="726" y="222" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Value name="BatchMacroGroupBy" />
+          <Value name="ControlParams"><![CDATA[Filter=Filter
+SetName=SETNAME
+]]></Value>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+        <MetaInfo connection="Output7">
+          <RecordInfo>
+            <Field name="RCLNT" size="3" source="TextInput: (BatchMacro) (BatchMacro)" type="String" />
+            <Field name="RYEAR" source="TextInput: (BatchMacro) (BatchMacro)" type="Int16" />
+            <Field name="DOCNR" size="10" source="TextInput: (BatchMacro) (BatchMacro)" type="String" />
+            <Field name="RLDNR" size="2" source="TextInput: (BatchMacro) (BatchMacro)" type="String" />
+            <Field name="RBUKRS" size="4" source="TextInput: (BatchMacro) (BatchMacro)" type="String" />
+            <Field name="DOCLN" size="6" source="TextInput: (BatchMacro) (BatchMacro)" type="String" />
+            <Field name="RACCT" size="2" source="TextInput: (BatchMacro) (BatchMacro)" type="String" />
+            <Field name="HSL" source="TextInput: (BatchMacro) (BatchMacro)" type="Double" />
+            <Field name="Set Name" size="1073741823" source="Formula: &quot;TEST01&quot; (BatchMacro) (BatchMacro)" type="V_WString" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings Macro="macros\Tag with Sets.yxmc" />
+    </Node>
+    <Node ToolID="19">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.BrowseV2.BrowseV2">
+        <Position x="822" y="222" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <TempFile>C:\Users\tlarsen\AppData\Local\Temp\Engine_3296_30e9198a94364271a3393dc5a4d3ed7f_\Engine_9220_c2e1dcdb71aa4c65a5a2fb3ae9ee9921_.yxdb</TempFile>
+          <TempFileDataProfiling />
+          <Layout>
+            <ViewMode>Single</ViewMode>
+            <ViewSize value="100" />
+            <View1>
+              <DefaultTab>Profile</DefaultTab>
+              <Hints>
+                <Table />
+              </Hints>
+            </View1>
+            <View2 />
+          </Layout>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxBrowseV2" />
+    </Node>
+    <Node ToolID="20">
+      <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+        <Position x="269" y="292" width="405.0632" height="188" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Caption>Container 20</Caption>
+          <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+          <Disabled value="False" />
+          <Folded value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <ChildNodes>
+        <Node ToolID="21">
+          <GuiSettings Plugin="AlteryxGuiToolkit.TextBox.TextBox">
+            <Position x="294" y="378" width="100" height="40" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Text>One level in</Text>
+              <Font name="Arial" size="8.25" style="0" />
+              <TextColor name="Black" />
+              <FillColor name="White" />
+              <Shape shape="0" />
+              <Justification Justification="4" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+        </Node>
+        <Node ToolID="22">
+          <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
+            <Position x="497" y="341" width="152.0632" height="114" />
+          </GuiSettings>
+          <Properties>
+            <Configuration>
+              <Caption>Container 22</Caption>
+              <Style TextColor="#314c4a" FillColor="#ecf2f2" BorderColor="#314c4a" Transparency="25" Margin="25" />
+              <Disabled value="False" />
+              <Folded value="False" />
+            </Configuration>
+            <Annotation DisplayMode="0">
+              <Name />
+              <DefaultAnnotationText />
+              <Left value="False" />
+            </Annotation>
+          </Properties>
+          <ChildNodes>
+            <Node ToolID="23">
+              <GuiSettings Plugin="AlteryxGuiToolkit.TextBox.TextBox">
+                <Position x="522" y="390" width="100" height="40" />
+              </GuiSettings>
+              <Properties>
+                <Configuration>
+                  <Text>Two levels in</Text>
+                  <Font name="Arial" size="8.25" style="0" />
+                  <TextColor name="Black" />
+                  <FillColor name="White" />
+                  <Shape shape="0" />
+                  <Justification Justification="4" />
+                </Configuration>
+                <Annotation DisplayMode="0">
+                  <Name />
+                  <DefaultAnnotationText />
+                  <Left value="False" />
+                </Annotation>
+              </Properties>
+            </Node>
+          </ChildNodes>
+        </Node>
+      </ChildNodes>
+    </Node>
+  </Nodes>
+  <Connections>
+    <Connection>
+      <Origin ToolID="1" Connection="Output" />
+      <Destination ToolID="6" Connection="Left" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="4" Connection="Output" />
+      <Destination ToolID="6" Connection="Right" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="5" Connection="Output" />
+      <Destination ToolID="18" Connection="Input1" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="17" Connection="Output" />
+      <Destination ToolID="18" Connection="Control" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="6" Connection="Join" />
+      <Destination ToolID="12" Connection="Input1" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="12" Connection="Output" />
+      <Destination ToolID="13" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="13" Connection="True" />
+      <Destination ToolID="14" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="13" Connection="False" />
+      <Destination ToolID="15" Connection="Input" />
+    </Connection>
+    <Connection name="#1">
+      <Origin ToolID="14" Connection="Output" />
+      <Destination ToolID="16" Connection="Input" />
+    </Connection>
+    <Connection name="#2">
+      <Origin ToolID="15" Connection="Output" />
+      <Destination ToolID="16" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="16" Connection="Output" />
+      <Destination ToolID="17" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="18" Connection="Output7" />
+      <Destination ToolID="19" Connection="Input" />
+    </Connection>
+  </Connections>
+  <Properties>
+    <Memory default="True" />
+    <GlobalRecordLimit value="0" />
+    <TempFiles default="True" />
+    <Annotation on="True" includeToolName="False" />
+    <ConvErrorLimit value="10" />
+    <ConvErrorLimit_Stop value="False" />
+    <CancelOnError value="False" />
+    <DisableBrowse value="False" />
+    <EnablePerformanceProfiling value="False" />
+    <DisableAllOutput value="False" />
+    <ShowAllMacroMessages value="False" />
+    <ShowConnectionStatusIsOn value="True" />
+    <ShowConnectionStatusOnlyWhenRunning value="True" />
+    <ZoomLevel value="0" />
+    <LayoutType>Horizontal</LayoutType>
+    <MetaInfo>
+      <NameIsFileName value="True" />
+      <Name>01 SETLEAF Equations Completed</Name>
+      <Description />
+      <RootToolName />
+      <ToolVersion />
+      <ToolInDb value="False" />
+      <CategoryName />
+      <SearchTags />
+      <Author />
+      <Company />
+      <Copyright />
+      <DescriptionLink actual="" displayed="" />
+      <Example>
+        <Description />
+        <File />
+      </Example>
+    </MetaInfo>
+    <Events>
+      <Enabled value="True" />
+    </Events>
+  </Properties>
+</AlteryxDocument>
