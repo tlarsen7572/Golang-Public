@@ -234,6 +234,18 @@ func TestExtractMacroMultipleConnections(t *testing.T) {
 	r.RebuildTestdocs(baseFolder)
 }
 
+func TestHiddenConnections(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	file, _ := generateAbsPath(`..`, `testdocs`, `01 SETLEAF Equations Completed.yxmd`)
+	doc, _ := ryxdoc.ReadFile(file)
+	if !doc.ReadAllConnections()[0].Wireless {
+		t.Fatalf(`expected the first connection to have a wireless connection but it did not`)
+	}
+	if doc.ReadAllConnections()[1].Wireless {
+		t.Fatalf(`expected the second connection to have a wired connection but it was wireless`)
+	}
+}
+
 func listHasConnection(conns []*ryxdoc.RyxConn, fromId int, fromAnchor string, toId int, toAnchor string) bool {
 	connFound := false
 	for _, conn := range conns {

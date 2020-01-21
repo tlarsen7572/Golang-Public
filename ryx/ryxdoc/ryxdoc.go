@@ -20,6 +20,7 @@ type RyxConn struct {
 	ToId       int
 	FromAnchor string
 	ToAnchor   string
+	Wireless   bool
 }
 
 func ReadFile(path string) (*RyxDoc, error) {

@@ -53,9 +53,13 @@ func (ryxDoc *RyxDoc) marshalNodesInto(tempData *txml.Node) {
 
 func (ryxDoc *RyxDoc) marshalConnectionsInto(tempData *txml.Node) {
 	for index, conn := range ryxDoc.connections {
+		wireless := `False`
+		if conn.Wireless {
+			wireless = `True`
+		}
 		tempData.Nodes[1].Nodes[index] = &txml.Node{
 			Name:       `Connection`,
-			Attributes: map[string]string{`name`: conn.Name},
+			Attributes: map[string]string{`name`: conn.Name, `Wireless`: wireless},
 			Nodes: []*txml.Node{
 				{
 					Name:       "Origin",
@@ -92,6 +96,11 @@ func (ryxDoc *RyxDoc) collectConnectionsAndRemoveXml() error {
 	ryxDoc.connections = make([]*RyxConn, connCount)
 	for index, conn := range connections {
 		name := conn.Attributes[`name`]
+		wireless := false
+		wirelessAttr := conn.Attributes[`Wireless`]
+		if wirelessAttr == `True` {
+			wireless = true
+		}
 		origin := conn.First(`Origin`)
 		destination := conn.First(`Destination`)
 		fromId, err := strconv.Atoi(origin.Attributes[`ToolID`])
@@ -104,7 +113,7 @@ func (ryxDoc *RyxDoc) collectConnectionsAndRemoveXml() error {
 		}
 		fromAnchor := origin.Attributes[`Connection`]
 		toAnchor := destination.Attributes[`Connection`]
-		ryxDoc.connections[index] = &RyxConn{Name: name, FromId: fromId, ToId: toId, FromAnchor: fromAnchor, ToAnchor: toAnchor}
+		ryxDoc.connections[index] = &RyxConn{Name: name, FromId: fromId, ToId: toId, FromAnchor: fromAnchor, ToAnchor: toAnchor, Wireless: wireless}
 	}
 	ryxDoc.data.RemoveFirst(`Connections`)
 	return nil

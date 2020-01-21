@@ -728,7 +728,7 @@ SetName=SETNAME
     </Node>
   </Nodes>
   <Connections>
-    <Connection>
+    <Connection Wireless="True">
       <Origin ToolID="1" Connection="Output" />
       <Destination ToolID="6" Connection="Left" />
     </Connection>
