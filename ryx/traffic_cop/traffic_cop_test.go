@@ -527,6 +527,36 @@ func TestMakeAllMacrosAbsolute(t *testing.T) {
 	rebuildTestDocs()
 }
 
+func TestInterfaceNodesDocumentStructure(t *testing.T) {
+	var doc, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `Interface.yxmc`))
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Project:    workFolder,
+		Function:   `GetDocumentStructure`,
+		Parameters: map[string]string{`FilePath`: doc},
+		Out:        out,
+		Config: &config.Config{
+			ToolData: []tool_data_loader.ToolData{},
+		},
+	}
+	response := <-out
+	if response.Err != nil {
+		t.Fatalf(`expected no error but got: %v`, response.Err.Error())
+	}
+	if response.Response == nil {
+		t.Fatalf(`expected a non-nil response but got nil`)
+	}
+	structure := response.Response.(cop.DocumentStructure)
+	if count := len(structure.Nodes); count != 40 {
+		t.Fatalf(`expected 40 nodes but got %v`, count)
+	}
+	encoded, _ := json.Marshal(response)
+	t.Logf(string(encoded))
+}
+
 func rebuildTestDocs() {
 	testdocbuilder.RebuildTestdocs(filepath.Join(`..`, `testdocs`))
 }

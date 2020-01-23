@@ -89,8 +89,8 @@ func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionRespo
 		if err != nil {
 			continue
 		}
-		category := node.ReadCategory().String()
-		if category == `Invalid` {
+		plugin := node.ReadPlugin()
+		if plugin == `AlteryxGuiToolkit.Questions.Tab.Tab` {
 			continue
 		}
 		position, err := node.ReadPosition()
@@ -98,7 +98,7 @@ func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionRespo
 			position = ryxnode.Position{X: 0, Y: 0, Width: 0, Height: 0}
 		}
 		macro := node.ReadMacro(macroPaths...)
-		plugin := node.ReadPlugin()
+		category := node.ReadCategory().String()
 		nodes = append(nodes, NodeStructure{
 			ToolId:      id,
 			X:           position.X,
