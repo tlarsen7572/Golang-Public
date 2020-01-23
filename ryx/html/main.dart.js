@@ -39271,9 +39271,7 @@ if(o==null){n=r.d
 m=r.a
 o=r.vA(p,n,m.b+m.d)}p=s.e
 l=q.Ag(p)
-if(l==null){n=q.d
-m=q.a
-l=q.vA(p,n,m.b+m.d)}a.iI(o,l,h)}for(j=i.gau(i),j=j.gK(j);j.p();){u=j.gA(j)
+a.iI(o,l==null?q.vA(p,q.c,q.a.b):l,h)}for(j=i.gau(i),j=j.gK(j);j.p();){u=j.gA(j)
 p=u.a
 n=p.b
 m=p.c
