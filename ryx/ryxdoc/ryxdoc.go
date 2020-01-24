@@ -48,7 +48,12 @@ func ReadBytes(content []byte) (*RyxDoc, error) {
 }
 
 func (ryxDoc *RyxDoc) ReadNodes() []*ryxnode.RyxNode {
-	return ryxDoc.nodes
+	nodes := []*ryxnode.RyxNode{}
+	for _, node := range ryxDoc.nodes {
+		nodes = append(nodes, node)
+		nodes = append(nodes, node.ReadChildren()...)
+	}
+	return nodes
 }
 
 func (ryxDoc *RyxDoc) ReadMappedNodes() map[int]*ryxnode.RyxNode {
