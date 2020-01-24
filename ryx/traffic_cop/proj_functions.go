@@ -10,8 +10,8 @@ import (
 
 type NodeStructure struct {
 	ToolId      int
-	X           int
-	Y           int
+	X           float64
+	Y           float64
 	Width       float64
 	Height      float64
 	Plugin      string

@@ -3,14 +3,16 @@ package ryxdoc
 import (
 	"errors"
 	"fmt"
+	h "github.com/tlarsen7572/Golang-Public/helpers"
 	"github.com/tlarsen7572/Golang-Public/ryx/ryxnode"
 	"github.com/tlarsen7572/Golang-Public/txml"
+	"math"
 	"path/filepath"
 	"strconv"
 )
 
-var gridStartPos = 54
-var gridSize = 12
+var gridStartPos = 54.0
+var gridSize = 12.0
 var horizontalGap = gridSize * 8
 var verticalGap = gridSize * 7
 
@@ -86,7 +88,7 @@ func directionSelected(connections map[int][]*RyxConn, startingAt int, getId fun
 	return false
 }
 
-func normalizeToolPositions(doc *RyxDoc, minLeft int, minTop int) (int, int) {
+func normalizeToolPositions(doc *RyxDoc, minLeft float64, minTop float64) (float64, float64) {
 	startX := gridStartPos + horizontalGap
 	startY := gridStartPos
 	adjustX := startX - minLeft
@@ -100,7 +102,7 @@ func normalizeToolPositions(doc *RyxDoc, minLeft int, minTop int) (int, int) {
 	return adjustX, adjustY
 }
 
-func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *ryxnode.RyxNode, outputX int, toolIds ...int) {
+func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *ryxnode.RyxNode, outputX float64, toolIds ...int) {
 	newMacroToolId, err := newMacroTool.ReadId()
 	if err != nil {
 		return
@@ -111,8 +113,8 @@ func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *r
 	newMacro.nodes = append(newMacro.nodes, questionTab)
 	tab := addTabQuestion(newMacro, questionTabId)
 
-	inputCount := 0
-	outputCount := 0
+	inputCount := 0.0
+	outputCount := 0.0
 	for _, connection := range origDoc.connections {
 		matchesFrom := intsContain(toolIds, connection.FromId)
 		matchesTo := intsContain(toolIds, connection.ToId)
@@ -193,9 +195,9 @@ func copyConnections(from *RyxDoc, to *RyxDoc, toolIds ...int) {
 	}
 }
 
-func (ryxDoc *RyxDoc) getBoundingBox(toolIds ...int) (left int, top int, right int, bottom int) {
-	left = maxInt()
-	top = maxInt()
+func (ryxDoc *RyxDoc) getBoundingBox(toolIds ...int) (left float64, top float64, right float64, bottom float64) {
+	left = maxDouble()
+	top = maxDouble()
 	right = 0
 	bottom = 0
 	for _, node := range ryxDoc.nodes {
@@ -231,8 +233,8 @@ func intsContain(values []int, check int) bool {
 	return false
 }
 
-func maxInt() int {
-	return int(^uint(0) >> 1)
+func maxDouble() float64 {
+	return math.MaxFloat64
 }
 
 func readLargestInt(values []int) int {
@@ -286,7 +288,7 @@ func generateQuestion(qType string, description string, name string, toolId int)
 	}
 }
 
-func newMacroInputXml(id int, x int, y int) *txml.Node {
+func newMacroInputXml(id int, x float64, y float64) *txml.Node {
 	return &txml.Node{
 		Name: `Node`,
 		Attributes: map[string]string{
@@ -299,7 +301,7 @@ func newMacroInputXml(id int, x int, y int) *txml.Node {
 				Nodes: []*txml.Node{
 					{
 						Name:       `Position`,
-						Attributes: map[string]string{`x`: strconv.Itoa(x), `y`: strconv.Itoa(y)},
+						Attributes: map[string]string{`x`: h.DblToStr(x, 0), `y`: h.DblToStr(y, 0)},
 					},
 				},
 			},
@@ -356,7 +358,7 @@ func newMacroInputXml(id int, x int, y int) *txml.Node {
 	}
 }
 
-func newMacroOutputXml(id int, x int, y int) *txml.Node {
+func newMacroOutputXml(id int, x float64, y float64) *txml.Node {
 	return &txml.Node{
 		Name: `Node`,
 		Attributes: map[string]string{
@@ -369,7 +371,7 @@ func newMacroOutputXml(id int, x int, y int) *txml.Node {
 				Nodes: []*txml.Node{
 					{
 						Name:       `Position`,
-						Attributes: map[string]string{`x`: strconv.Itoa(x), `y`: strconv.Itoa(y)},
+						Attributes: map[string]string{`x`: h.DblToStr(x, 0), `y`: h.DblToStr(y, 0)},
 					},
 				},
 			},

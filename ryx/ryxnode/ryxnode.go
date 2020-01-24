@@ -16,8 +16,8 @@ type RyxNode struct {
 }
 
 type Position struct {
-	X      int
-	Y      int
+	X      float64
+	Y      float64
 	Width  float64
 	Height float64
 }
@@ -55,11 +55,11 @@ func (ryxNode *RyxNode) ReadId() (int, error) {
 
 func (ryxNode *RyxNode) ReadPosition() (Position, error) {
 	gui := ryxNode.data.First(`GuiSettings`).First(`Position`)
-	x, err := strconv.Atoi(gui.Attributes[`x`])
+	x, err := strconv.ParseFloat(gui.Attributes[`x`], 64)
 	if err != nil {
 		return Position{}, err
 	}
-	y, err := strconv.Atoi(gui.Attributes[`y`])
+	y, err := strconv.ParseFloat(gui.Attributes[`y`], 64)
 	if err != nil {
 		return Position{}, err
 	}
@@ -78,9 +78,9 @@ func (ryxNode *RyxNode) ReadPlugin() string {
 	return ryxNode.data.First(`GuiSettings`).Attributes[`Plugin`]
 }
 
-func (ryxNode *RyxNode) SetPosition(x int, y int) {
+func (ryxNode *RyxNode) SetPosition(x float64, y float64) {
 	setting := ryxNode.data.First(`GuiSettings`).First(`Position`)
-	setting.Attributes = map[string]string{`x`: strconv.Itoa(x), `y`: strconv.Itoa(y)}
+	setting.Attributes = map[string]string{`x`: h.DblToStr(x, 0), `y`: h.DblToStr(y, 0)}
 }
 
 func (ryxNode *RyxNode) ReadMacro(macroPaths ...string) MacroPath {
@@ -211,7 +211,7 @@ func New(node *txml.Node) *RyxNode {
 	return &RyxNode{node}
 }
 
-func NewMacroXml(id int, path string, x int, y int) *txml.Node {
+func NewMacroXml(id int, path string, x float64, y float64) *txml.Node {
 	path = strings.Replace(path, string(os.PathSeparator), `\`, -1)
 
 	return &txml.Node{
@@ -226,8 +226,8 @@ func NewMacroXml(id int, path string, x int, y int) *txml.Node {
 					{
 						Name: `Position`,
 						Attributes: map[string]string{
-							`x`: strconv.Itoa(x),
-							`y`: strconv.Itoa(y),
+							`x`: h.DblToStr(x, 0),
+							`y`: h.DblToStr(y, 0),
 						},
 					},
 				},

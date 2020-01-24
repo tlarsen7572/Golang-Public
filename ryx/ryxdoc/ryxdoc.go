@@ -107,7 +107,7 @@ func (ryxDoc *RyxDoc) RemoveConnectionsBetween(toolIds ...int) {
 	ryxDoc.connections = keep
 }
 
-func (ryxDoc *RyxDoc) AddMacroAt(path string, x int, y int) *ryxnode.RyxNode {
+func (ryxDoc *RyxDoc) AddMacroAt(path string, x float64, y float64) *ryxnode.RyxNode {
 	id := ryxDoc.grabNextIdAndIncrement()
 	macro := ryxnode.NewMacroXml(id, path, x, y)
 	node := ryxnode.New(macro)

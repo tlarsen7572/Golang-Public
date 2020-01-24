@@ -1,6 +1,9 @@
 package helpers
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 type StringArray []string
 
@@ -26,4 +29,8 @@ func (array IntArray) Contains(element int) bool {
 
 func WinJoin(elements ...string) string {
 	return strings.Join(elements, `\`)
+}
+
+func DblToStr(value float64, decimals int) string {
+	return strconv.FormatFloat(value, 'f', decimals, 64)
 }
