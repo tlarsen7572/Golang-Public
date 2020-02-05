@@ -181,6 +181,14 @@ func TestRemoveFirst(t *testing.T) {
 	}
 }
 
+func TestRemoveAll(t *testing.T) {
+	parsed, _ := txml.Parse(multiChildXml)
+	parsed.RemoveAll(`Child`)
+	if count := len(parsed.Nodes); count != 0 {
+		t.Fatalf(`expected 0 nodes but got %v`, count)
+	}
+}
+
 func TestHumanReadable(t *testing.T) {
 	parsed, err := txml.Parse(humanReadable)
 	if err != nil {

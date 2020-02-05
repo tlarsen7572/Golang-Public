@@ -2,6 +2,7 @@ package txml
 
 import (
 	"encoding/xml"
+	"regexp"
 	"sort"
 )
 
@@ -36,6 +37,12 @@ func (node *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if err == nil && len(node.Nodes) > 0 {
 		node.InnerText = ``
 	}
+
+	isEmpty, err := regexp.MatchString(`^\s*$`, node.InnerText)
+	if err == nil && isEmpty {
+		node.InnerText = ``
+	}
+
 	return err
 }
 
@@ -86,6 +93,17 @@ func (node *Node) RemoveFirst(findName string) {
 		}
 	}
 	node.Nodes = append(node.Nodes[:index], node.Nodes[index+1:]...)
+}
+
+func (node *Node) RemoveAll(findName string) {
+	newNodes := []*Node{}
+	for _, node := range node.Nodes {
+		if node.Name == findName {
+			continue
+		}
+		newNodes = append(newNodes, node)
+	}
+	node.Nodes = newNodes
 }
 
 func (node *Node) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
