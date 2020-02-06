@@ -12,6 +12,7 @@ func (ryxDoc *RyxDoc) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	ryxDoc.marshalNodesInto(tempData)
 	ryxDoc.marshalConnectionsInto(tempData)
 	ryxDoc.marshalRemainderInto(tempData)
+	e.Indent(``, `  `)
 	return e.EncodeElement(tempData, start)
 }
 

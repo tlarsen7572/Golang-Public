@@ -41,7 +41,11 @@ func _cleanFile(path string, info os.FileInfo, err error) error {
 	if err != nil {
 		return _print(err)
 	}
+
+	//Alteryx does not like escaped tabs
+	xmlStr = strings.Replace(xmlStr, `&#x9;`, "\t", -1)
 	xmlBytes := []byte(xmlStr)
+
 	err = ioutil.WriteFile(path, xmlBytes, os.ModePerm)
 	if err != nil {
 		return _print(err)

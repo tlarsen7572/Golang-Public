@@ -5,6 +5,7 @@ import (
 	"github.com/tlarsen7572/Golang-Public/ryx/ryxnode"
 	"github.com/tlarsen7572/Golang-Public/txml"
 	"io/ioutil"
+	"strings"
 )
 
 type RyxDoc struct {
@@ -191,6 +192,12 @@ func (ryxDoc *RyxDoc) Save(path string) error {
 	if err != nil {
 		return err
 	}
+
+	//Alteryx does not like escaped tabs, so convert them to literals before we save
+	str := string(data)
+	str = strings.Replace(str, `&#x9;`, "\t", -1)
+	data = []byte(str)
+
 	return ioutil.WriteFile(path, data, 0644)
 }
 
