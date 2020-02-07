@@ -202,3 +202,22 @@ func TestHumanReadable(t *testing.T) {
 		t.Fatalf(`expected '%v' but got '%v'`, humanReadable, xml)
 	}
 }
+
+func TestInnerTextLeadingSpaceToXml(t *testing.T) {
+	node := txml.Node{
+		Name:       "Element",
+		Attributes: map[string]string{"id": "1", "type": "Something"},
+		Nodes: []*txml.Node{
+			{Name: "Sub", InnerText: " My Text with leading space"},
+		},
+	}
+	xml, err := node.ToXml(``)
+
+	if err != nil {
+		t.Fatalf(`expected no error but got '%v'`, err.Error())
+	}
+	expectedXml := `<Element id="1" type="Something"><Sub><![CDATA[ My Text with leading space]]></Sub></Element>`
+	if xml != expectedXml {
+		t.Fatalf(`expected xml '%v' but got '%v'`, expectedXml, xml)
+	}
+}
