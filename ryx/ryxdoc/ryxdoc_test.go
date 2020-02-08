@@ -1,6 +1,7 @@
 package ryxdoc_test
 
 import (
+	"encoding/xml"
 	"github.com/tlarsen7572/Golang-Public/ryx/ryxdoc"
 	r "github.com/tlarsen7572/Golang-Public/ryx/testdocbuilder"
 	"os"
@@ -255,6 +256,17 @@ func TestHiddenConnections(t *testing.T) {
 	if doc.Connections[1].Wireless {
 		t.Fatalf(`expected the second connection to have a wired connection but it was wireless`)
 	}
+}
+
+func TestMarshallIndent(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	file, _ := generateAbsPath(`..`, `testdocs`, `01 SETLEAF Equations Completed.yxmd`)
+	doc, _ := ryxdoc.ReadFile(file)
+	marshalled, err := xml.MarshalIndent(doc, ``, `  `)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	t.Logf(string(marshalled))
 }
 
 func listHasConnection(conns []*ryxdoc.RyxConn, fromId int, fromAnchor string, toId int, toAnchor string) bool {
