@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/tlarsen7572/Golang-Public/helpers"
-	"github.com/tlarsen7572/Golang-Public/txml"
-	"io/ioutil"
+	"github.com/tlarsen7572/Golang-Public/ryx/ryxdoc"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,47 +25,16 @@ func _cleanFile(path string, info os.FileInfo, err error) error {
 		return nil
 	}
 
-	content, err := ioutil.ReadFile(path)
+	doc, err := ryxdoc.ReadFile(path)
 	if err != nil {
 		return _print(err)
 	}
 
-	xmlNode, err := txml.Parse(string(content))
-	if err != nil {
-		return _print(err)
-	}
-
-	_cleanDoc(xmlNode)
-	xmlStr, err := xmlNode.ToXml(`  `)
-	if err != nil {
-		return _print(err)
-	}
-
-	//Alteryx does not like escaped tabs
-	xmlStr = strings.Replace(xmlStr, `&#x9;`, "\t", -1)
-	xmlBytes := []byte(xmlStr)
-
-	err = ioutil.WriteFile(path, xmlBytes, os.ModePerm)
+	err = doc.Save(path)
 	if err != nil {
 		return _print(err)
 	}
 	return nil
-}
-
-func _cleanDoc(xml *txml.Node) {
-	nodes := xml.First(`Nodes`)
-	_cleanNodes(nodes)
-}
-
-func _cleanNodes(nodes *txml.Node) {
-	for _, node := range nodes.Nodes {
-		properties := node.First(`Properties`)
-		properties.RemoveAll(`MetaInfo`)
-		childNodes := node.First(`ChildNodes`)
-		if len(childNodes.Nodes) > 0 {
-			_cleanNodes(childNodes)
-		}
-	}
 }
 
 func _print(err error) error {
