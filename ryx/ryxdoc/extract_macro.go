@@ -109,22 +109,22 @@ func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *r
 	}
 
 	questionTabId := newMacro.grabNextIdAndIncrement()
-	questionTab := ryxnode.New(newQuestionTabXml(questionTabId))
-	newMacro.nodes = append(newMacro.nodes, questionTab)
+	questionTab := newQuestionTab(questionTabId)
+	newMacro.Nodes = append(newMacro.Nodes, questionTab)
 	tab := addTabQuestion(newMacro, questionTabId)
 
 	inputCount := 0.0
 	outputCount := 0.0
-	for _, connection := range origDoc.connections {
+	for _, connection := range origDoc.Connections {
 		matchesFrom := intsContain(toolIds, connection.FromId)
 		matchesTo := intsContain(toolIds, connection.ToId)
 		if matchesFrom && !matchesTo {
 			y := gridStartPos + (verticalGap * outputCount)
 			outputCount += 1
 			outputId := newMacro.grabNextIdAndIncrement()
-			output := ryxnode.New(newMacroOutputXml(outputId, outputX, y))
+			output := newMacroOutput(outputId, outputX, y)
 			addQuestionToTab(tab, `MacroOutput`, fmt.Sprintf(`Macro Output (%v)`, outputId), outputId)
-			newMacro.nodes = append(newMacro.nodes, output)
+			newMacro.Nodes = append(newMacro.Nodes, output)
 			newMacro.AddConnection(&RyxConn{
 				Name:       connection.Name,
 				FromId:     connection.FromId,
@@ -139,9 +139,9 @@ func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *r
 			y := gridStartPos + (verticalGap * inputCount)
 			inputCount += 1
 			inputId := newMacro.grabNextIdAndIncrement()
-			input := ryxnode.New(newMacroInputXml(inputId, gridStartPos, y))
+			input := newMacroInput(inputId, gridStartPos, y)
 			addQuestionToTab(tab, `MacroInput`, fmt.Sprintf(`Macro Input (%v)`, inputId), inputId)
-			newMacro.nodes = append(newMacro.nodes, input)
+			newMacro.Nodes = append(newMacro.Nodes, input)
 			newMacro.AddConnection(&RyxConn{
 				Name:       connection.Name,
 				FromId:     inputId,
@@ -158,7 +158,7 @@ func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *r
 func readIoConns(doc *RyxDoc) (outputConns map[int][]*RyxConn, inputConns map[int][]*RyxConn) {
 	outputConns = map[int][]*RyxConn{}
 	inputConns = map[int][]*RyxConn{}
-	for _, conn := range doc.connections {
+	for _, conn := range doc.Connections {
 		outputConns[conn.FromId] = append(outputConns[conn.FromId], conn)
 		inputConns[conn.ToId] = append(inputConns[conn.ToId], conn)
 	}
@@ -175,10 +175,10 @@ func generateDocFrom(from *RyxDoc, toolIds ...int) *RyxDoc {
 }
 
 func copyNodes(from *RyxDoc, to *RyxDoc, toolIds ...int) {
-	for _, node := range from.nodes {
+	for _, node := range from.Nodes {
 		for _, id := range toolIds {
 			if checkId, _ := node.ReadId(); checkId == id {
-				to.nodes = append(to.nodes, node)
+				to.Nodes = append(to.Nodes, node)
 				break
 			}
 		}
@@ -186,7 +186,7 @@ func copyNodes(from *RyxDoc, to *RyxDoc, toolIds ...int) {
 }
 
 func copyConnections(from *RyxDoc, to *RyxDoc, toolIds ...int) {
-	for _, connection := range from.connections {
+	for _, connection := range from.Connections {
 		matchesFrom := intsContain(toolIds, connection.FromId)
 		matchesTo := intsContain(toolIds, connection.ToId)
 		if matchesFrom && matchesTo {
@@ -200,7 +200,7 @@ func (ryxDoc *RyxDoc) getBoundingBox(toolIds ...int) (left float64, top float64,
 	top = maxDouble()
 	right = 0
 	bottom = 0
-	for _, node := range ryxDoc.nodes {
+	for _, node := range ryxDoc.Nodes {
 		for _, id := range toolIds {
 			if checkId, _ := node.ReadId(); checkId == id {
 				if position, err := node.ReadPosition(); err == nil {
@@ -248,7 +248,7 @@ func readLargestInt(values []int) int {
 }
 
 func addTabQuestion(doc *RyxDoc, tabId int) *txml.Node {
-	node := doc.data.First(`Properties`).First(`RuntimeProperties`).First(`Questions`)
+	node := doc.Properties.First(`RuntimeProperties`).First(`Questions`)
 	name := fmt.Sprintf(`Tab (%v)`, tabId)
 	question := generateQuestion(`Tab`, `Questions`, name, tabId)
 	node.Nodes = append(node.Nodes, question)
@@ -288,136 +288,76 @@ func generateQuestion(qType string, description string, name string, toolId int)
 	}
 }
 
-func newMacroInputXml(id int, x float64, y float64) *txml.Node {
-	return &txml.Node{
-		Name: `Node`,
-		Attributes: map[string]string{
-			`ToolID`: strconv.Itoa(id),
+func newMacroInput(id int, x float64, y float64) *ryxnode.RyxNode {
+	return &ryxnode.RyxNode{
+		ToolId: strconv.Itoa(id),
+		GuiSettings: &txml.Node{
+			Name:       `GuiSettings`,
+			Attributes: map[string]string{`Plugin`: `AlteryxBasePluginsGui.MacroInput.MacroInput`},
+			Nodes: []*txml.Node{
+				{
+					Name:       `Position`,
+					Attributes: map[string]string{`x`: h.DblToStr(x, 0), `y`: h.DblToStr(y, 0)},
+				},
+			},
 		},
-		Nodes: []*txml.Node{
-			{
-				Name:       `GuiSettings`,
-				Attributes: map[string]string{`Plugin`: `AlteryxBasePluginsGui.MacroInput.MacroInput`},
-				Nodes: []*txml.Node{
-					{
-						Name:       `Position`,
-						Attributes: map[string]string{`x`: h.DblToStr(x, 0), `y`: h.DblToStr(y, 0)},
-					},
-				},
-			},
-			{
-				Name: `Properties`,
-				Nodes: []*txml.Node{
-					{
-						Name: `Configuration`,
-						Nodes: []*txml.Node{
-							{
-								Name:       `UseFileInput`,
-								Attributes: map[string]string{`value`: `False`},
-							},
-							{
-								Name:      `Name`,
-								InnerText: `Input` + strconv.Itoa(id),
-							},
-							{
-								Name: `Abbrev`,
-							},
-							{
-								Name:       `ShowFieldMap`,
-								Attributes: map[string]string{`value`: `False`},
-							},
-							{
-								Name:       `Optional`,
-								Attributes: map[string]string{`value`: `False`},
-							},
-							{
-								Name: `TextInput`,
-								Nodes: []*txml.Node{
-									{
-										Name: `Configuration`,
-										Nodes: []*txml.Node{
-											{Name: `NumRows`, Attributes: map[string]string{`value`: `0`}},
-											{Name: `Fields`},
-											{Name: `Data`},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			{
-				Name: `EngineSettings`,
-				Attributes: map[string]string{
-					`EngineDll`:           `AlteryxBasePluginsEngine.dll`,
-					`EngineDllEntryPoint`: `AlteryxMacroInput`,
-				},
+		Properties: &ryxnode.Properties{
+			Configuration: ryxnode.Configuration{InnerXml: fmt.Sprintf(`<UseFileInput value="False" /><Name>Input%v</Name><Abbrev /><ShowFieldMap value="False" /><Optional value="False" /><TextInput><Configuration><NumRows value="0" /><Fields /><Data /></Configuration></TextInput>`, strconv.Itoa(id))},
+		},
+		EngineSettings: &txml.Node{
+			Name: `EngineSettings`,
+			Attributes: map[string]string{
+				`EngineDll`:           `AlteryxBasePluginsEngine.dll`,
+				`EngineDllEntryPoint`: `AlteryxMacroInput`,
 			},
 		},
 	}
 }
 
-func newMacroOutputXml(id int, x float64, y float64) *txml.Node {
-	return &txml.Node{
-		Name: `Node`,
-		Attributes: map[string]string{
-			`ToolID`: strconv.Itoa(id),
+func newMacroOutput(id int, x float64, y float64) *ryxnode.RyxNode {
+	return &ryxnode.RyxNode{
+		ToolId: strconv.Itoa(id),
+		GuiSettings: &txml.Node{
+			Name:       `GuiSettings`,
+			Attributes: map[string]string{`Plugin`: `AlteryxBasePluginsGui.MacroOutput.MacroOutput`},
+			Nodes: []*txml.Node{
+				{
+					Name:       `Position`,
+					Attributes: map[string]string{`x`: h.DblToStr(x, 0), `y`: h.DblToStr(y, 0)},
+				},
+			},
 		},
-		Nodes: []*txml.Node{
-			{
-				Name:       `GuiSettings`,
-				Attributes: map[string]string{`Plugin`: `AlteryxBasePluginsGui.MacroOutput.MacroOutput`},
-				Nodes: []*txml.Node{
-					{
-						Name:       `Position`,
-						Attributes: map[string]string{`x`: h.DblToStr(x, 0), `y`: h.DblToStr(y, 0)},
-					},
-				},
-			},
-			{
-				Name: `Properties`,
-				Nodes: []*txml.Node{
-					{
-						Name: `Configuration`,
-						Nodes: []*txml.Node{
-							{
-								Name:      `Name`,
-								InnerText: `Output` + strconv.Itoa(id),
-							},
-						},
-					},
-				},
-			},
-			{
-				Name: `EngineSettings`,
-				Attributes: map[string]string{
-					`EngineDll`:           `AlteryxBasePluginsEngine.dll`,
-					`EngineDllEntryPoint`: `AlteryxMacroOutput`,
-				},
+		Properties: &ryxnode.Properties{
+			Configuration: ryxnode.Configuration{InnerXml: `<Name>Output4</Name><Abbrev />`},
+		},
+		EngineSettings: &txml.Node{
+			Name: `EngineSettings`,
+			Attributes: map[string]string{
+				`EngineDll`:           `AlteryxBasePluginsEngine.dll`,
+				`EngineDllEntryPoint`: `AlteryxMacroOutput`,
 			},
 		},
 	}
 }
 
-func newQuestionTabXml(id int) *txml.Node {
-	return &txml.Node{
-		Name: `Node`,
-		Attributes: map[string]string{
-			`ToolID`: strconv.Itoa(id),
-		},
-		Nodes: []*txml.Node{
-			{
-				Name:       `GuiSettings`,
-				Attributes: map[string]string{`Plugin`: `AlteryxGuiToolkit.Questions.Tab.Tab`},
-				Nodes: []*txml.Node{
-					{
-						Name:       `Position`,
-						Attributes: map[string]string{`x`: `0`, `y`: `0`},
-					},
+func newQuestionTab(id int) *ryxnode.RyxNode {
+	return &ryxnode.RyxNode{
+		ToolId: strconv.Itoa(id),
+		GuiSettings: &txml.Node{
+			Name:       `GuiSettings`,
+			Attributes: map[string]string{`Plugin`: `AlteryxGuiToolkit.Questions.Tab.Tab`},
+			Nodes: []*txml.Node{
+				{
+					Name:       `Position`,
+					Attributes: map[string]string{`x`: `0`, `y`: `0`},
 				},
 			},
 		},
+		Properties: &ryxnode.Properties{
+			Configuration: ryxnode.Configuration{},
+			Annotation:    nil,
+		},
+		EngineSettings: txml.NilNode(),
 	}
 }
 

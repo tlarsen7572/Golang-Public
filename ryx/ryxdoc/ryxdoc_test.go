@@ -13,26 +13,29 @@ var yxmd = filepath.Join(`..`, `testdocs`, `01 SETLEAF Equations Completed.yxmd`
 var baseFolder = filepath.Join(`..`, `testdocs`)
 
 func TestLoadDocFromFile(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	doc, err := ryxdoc.ReadFile(yxmd)
 	if err != nil {
 		t.Fatalf(`expected no error but got %v`, err.Error())
 	}
 	allNodes := doc.ReadMappedNodes()
 	if len(allNodes) != 16 {
-		t.Fatalf(`expected 16 nodes but got %v`, len(allNodes))
+		t.Fatalf(`expected 16 Nodes but got %v`, len(allNodes))
 	}
 }
 
 func TestRemoveNodeFromDoc(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	doc, _ := ryxdoc.ReadFile(yxmd)
 	doc.RemoveNodes(1, 21)
 	allNodes := doc.ReadMappedNodes()
 	if len(allNodes) != 14 {
-		t.Fatalf(`expected 14 nodes but got %v`, len(allNodes))
+		t.Fatalf(`expected 14 Nodes but got %v`, len(allNodes))
 	}
 }
 
 func TestAddMacro(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	doc, _ := ryxdoc.ReadFile(yxmd)
 	node := doc.AddMacroAt(`.\macro.yxmc`, 5, 10)
 	if id, _ := node.ReadId(); id != 24 {
@@ -42,11 +45,12 @@ func TestAddMacro(t *testing.T) {
 		t.Fatalf(`expected macro path of '.\macro.yxmc' but got '%v'`, macro.StoredPath)
 	}
 	if count := len(doc.ReadMappedNodes()); count != 17 {
-		t.Fatalf(`expected 17 nodes but got %v`, count)
+		t.Fatalf(`expected 17 Nodes but got %v`, count)
 	}
 }
 
 func TestRenameMacroNodes(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	docFolder, _ := generateAbsPath(`..`, `testdocs`)
 	macroPath, _ := generateAbsPath(`..`, `testdocs`, `macros`, `Tag with Sets.yxmc`)
 	newPath, _ := generateAbsPath(`..`, `testdocs`, `macros`, `Tag.yxmc`)
@@ -59,6 +63,7 @@ func TestRenameMacroNodes(t *testing.T) {
 }
 
 func TestMakeAllMacrosAbsolute(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	docFolder, _ := generateAbsPath(`..`, `testdocs`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
 	changed := doc.MakeAllMacrosAbsolute(docFolder)
@@ -67,7 +72,7 @@ func TestMakeAllMacrosAbsolute(t *testing.T) {
 	expectedPath1 := strings.Replace(newPath1, string(os.PathSeparator), `\`, -1)
 	expectedPath2 := strings.Replace(newPath2, string(os.PathSeparator), `\`, -1)
 	if changed != 2 {
-		t.Fatalf(`expected 2 changed nodes but got %v`, changed)
+		t.Fatalf(`expected 2 changed Nodes but got %v`, changed)
 	}
 	if macro := doc.ReadMappedNodes()[18].ReadMacro(); macro.StoredPath != expectedPath1 {
 		t.Fatalf(`expected macro path of '%v' but got '%v'`, expectedPath1, macro.StoredPath)
@@ -78,6 +83,7 @@ func TestMakeAllMacrosAbsolute(t *testing.T) {
 }
 
 func TestMakeAllMacrosRelative(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	docFolder, _ := generateAbsPath(`..`, `testdocs`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
 	doc.MakeAllMacrosAbsolute(docFolder)
@@ -85,7 +91,7 @@ func TestMakeAllMacrosRelative(t *testing.T) {
 	expectedPath1 := `macros\Tag with Sets.yxmc`
 	expectedPath2 := `Calculate Filter Expression.yxmc`
 	if changed != 2 {
-		t.Fatalf(`expected 2 changed nodes but got %v`, changed)
+		t.Fatalf(`expected 2 changed Nodes but got %v`, changed)
 	}
 	if macro := doc.ReadMappedNodes()[18].ReadMacro(); macro.StoredPath != expectedPath1 {
 		t.Fatalf(`expected macro path of '%v' but got '%v'`, expectedPath1, macro.StoredPath)
@@ -96,6 +102,7 @@ func TestMakeAllMacrosRelative(t *testing.T) {
 }
 
 func TestMakeSpecificMacroAbsolute(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	docFolder, _ := generateAbsPath(`..`, `testdocs`)
 	macro, _ := generateAbsPath(`..`, `testdocs`, `Calculate Filter Expression.yxmc`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
@@ -114,6 +121,7 @@ func TestMakeSpecificMacroAbsolute(t *testing.T) {
 }
 
 func TestMakeSpecificMacroRelative(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	docFolder, _ := generateAbsPath(`..`, `testdocs`)
 	macro, _ := generateAbsPath(`..`, `testdocs`, `Calculate Filter Expression.yxmc`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
@@ -134,6 +142,7 @@ func TestMakeSpecificMacroRelative(t *testing.T) {
 }
 
 func TestExtractAbsoluteMacro(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	newMacroPath, _ := generateAbsPath(`..`, `testdocs`, `new.yxmc`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
 	err := doc.ExtractMacro(newMacroPath, ``, 13, 14, 15, 16, 17)
@@ -152,24 +161,25 @@ func TestExtractAbsoluteMacro(t *testing.T) {
 	}
 	if count := len(newMacro.ReadMappedNodes()); count != 8 {
 		r.RebuildTestdocs(baseFolder)
-		t.Fatalf(`expected 8 nodes in new macro but got %v`, count)
+		t.Fatalf(`expected 8 Nodes in new macro but got %v`, count)
 	}
-	if count := len(newMacro.ReadAllConnections()); count != 7 {
+	if count := len(newMacro.Connections); count != 7 {
 		r.RebuildTestdocs(baseFolder)
-		t.Fatalf(`expected 7 connections in new macro but got %v`, count)
+		t.Fatalf(`expected 7 Connections in new macro but got %v`, count)
 	}
 	if count := len(doc.ReadMappedNodes()); count != 12 {
 		r.RebuildTestdocs(baseFolder)
-		t.Fatalf(`expected 12 nodes in yxmd but got %v`, count)
+		t.Fatalf(`expected 12 Nodes in yxmd but got %v`, count)
 	}
-	if count := len(doc.ReadAllConnections()); count != 7 {
+	if count := len(doc.Connections); count != 7 {
 		r.RebuildTestdocs(baseFolder)
-		t.Fatalf(`expected 7 connections in yxmd but got %v`, count)
+		t.Fatalf(`expected 7 Connections in yxmd but got %v`, count)
 	}
 	r.RebuildTestdocs(baseFolder)
 }
 
 func TestExtractMacroWithHole(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	newMacroPath, _ := generateAbsPath(`..`, `testdocs`, `new.yxmc`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
 	err := doc.ExtractMacro(newMacroPath, ``, 13, 15, 16, 17)
@@ -181,6 +191,7 @@ func TestExtractMacroWithHole(t *testing.T) {
 }
 
 func TestExtractMacroMultipleConnections(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
 	newMacroPath, _ := generateAbsPath(`..`, `testdocs`, `new.yxmc`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
 	err := doc.ExtractMacro(newMacroPath, ``, 14, 15, 16)
@@ -195,13 +206,13 @@ func TestExtractMacroMultipleConnections(t *testing.T) {
 	}
 	if count := len(newMacro.ReadMappedNodes()); count != 7 {
 		r.RebuildTestdocs(baseFolder)
-		t.Fatalf(`expected 7 nodes in new macro but got %v`, count)
+		t.Fatalf(`expected 7 Nodes in new macro but got %v`, count)
 	}
-	if count := len(newMacro.ReadAllConnections()); count != 5 {
+	if count := len(newMacro.Connections); count != 5 {
 		r.RebuildTestdocs(baseFolder)
-		t.Fatalf(`expected 5 connections in new macro but got %v`, count)
+		t.Fatalf(`expected 5 Connections in new macro but got %v`, count)
 	}
-	macroConns := newMacro.ReadAllConnections()
+	macroConns := newMacro.Connections
 	if !listHasConnection(macroConns, 16, `Output`, 20, `Input`) {
 		r.RebuildTestdocs(baseFolder)
 		t.Fatalf(`new macro is missing connection to macro output`)
@@ -214,7 +225,7 @@ func TestExtractMacroMultipleConnections(t *testing.T) {
 		r.RebuildTestdocs(baseFolder)
 		t.Fatalf(`new macro is missing connection from second macro input`)
 	}
-	docConns := doc.ReadAllConnections()
+	docConns := doc.Connections
 	if !listHasConnection(docConns, 13, `True`, 24, `Input18`) {
 		r.RebuildTestdocs(baseFolder)
 		t.Fatalf(`original doc is missing connection to first macro input`)
@@ -238,10 +249,10 @@ func TestHiddenConnections(t *testing.T) {
 	r.RebuildTestdocs(baseFolder)
 	file, _ := generateAbsPath(`..`, `testdocs`, `01 SETLEAF Equations Completed.yxmd`)
 	doc, _ := ryxdoc.ReadFile(file)
-	if !doc.ReadAllConnections()[0].Wireless {
+	if !doc.Connections[0].Wireless {
 		t.Fatalf(`expected the first connection to have a wireless connection but it did not`)
 	}
-	if doc.ReadAllConnections()[1].Wireless {
+	if doc.Connections[1].Wireless {
 		t.Fatalf(`expected the second connection to have a wired connection but it was wireless`)
 	}
 }

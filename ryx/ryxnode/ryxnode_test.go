@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const tool = `<RyxNode ToolID="1">
+const tool = `<Node ToolID="1">
 	<GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
 		<Position x="318" y="222" />
 	</GuiSettings>
@@ -23,9 +23,9 @@ const tool = `<RyxNode ToolID="1">
 		<MetaInfo />
 	</Properties>
 	<EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
-</RyxNode>`
+</Node>`
 
-const macro = `    <RyxNode ToolID="22">
+const macro = `    <Node ToolID="22">
       <GuiSettings>
         <Position x="258" y="846" />
       </GuiSettings>
@@ -38,9 +38,9 @@ const macro = `    <RyxNode ToolID="22">
         </Annotation>
       </Properties>
       <EngineSettings Macro="_Utilities\ChooseText.yxmc" />
-    </RyxNode>`
+    </Node>`
 
-const cosmetic = `    <RyxNode ToolID="1">
+const cosmetic = `    <Node ToolID="1">
       <GuiSettings Plugin="AlteryxGuiToolkit.TextBox.TextBox">
         <Position x="150" y="162" width="100" height="40" />
       </GuiSettings>
@@ -59,7 +59,7 @@ const cosmetic = `    <RyxNode ToolID="1">
           <Left value="False" />
         </Annotation>
       </Properties>
-    </RyxNode>`
+    </Node>`
 
 const container = `    <Node ToolID="20">
       <GuiSettings Plugin="AlteryxGuiToolkit.ToolContainer.ToolContainer">
@@ -203,7 +203,7 @@ func TestInstantiateContainerNode(t *testing.T) {
 }
 
 func TestNodeToXml(t *testing.T) {
-	oldXml := `<RyxNode ToolID="1"><GuiSettings Plugin="A"><Position x="318" y="222"></Position></GuiSettings><Properties><Configuration></Configuration><Annotation DisplayMode="1"><Name>My Annotation</Name><DefaultAnnotationText>Default Annotation</DefaultAnnotationText><Left value="True"></Left></Annotation></Properties><EngineSettings EngineDll="B.dll" EngineDllEntryPoint="C" Macro=""></EngineSettings><ChildNodes><RyxNode ToolID="4"><GuiSettings Plugin="AlteryxBasePluginsGui.Formula.Formula"><Position x="570" y="90"></Position></GuiSettings><Properties><Configuration></Configuration><Annotation DisplayMode="0"><Name></Name><DefaultAnnotationText></DefaultAnnotationText><Left value="False"></Left></Annotation></Properties><EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFormula" Macro=""></EngineSettings><ChildNodes></ChildNodes></RyxNode></ChildNodes></RyxNode>`
+	oldXml := `<Node ToolID="1"><GuiSettings Plugin="A"><Position x="318" y="222"></Position></GuiSettings><Properties><Configuration></Configuration><Annotation DisplayMode="1"><Name>My Annotation</Name><DefaultAnnotationText>Default Annotation</DefaultAnnotationText><Left value="True"></Left></Annotation></Properties><EngineSettings EngineDll="B.dll" EngineDllEntryPoint="C" Macro=""></EngineSettings><ChildNodes><Node ToolID="4"><GuiSettings Plugin="AlteryxBasePluginsGui.Formula.Formula"><Position x="570" y="90"></Position></GuiSettings><Properties><Configuration></Configuration><Annotation DisplayMode="0"><Name></Name><DefaultAnnotationText></DefaultAnnotationText><Left value="False"></Left></Annotation></Properties><EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFormula" Macro=""></EngineSettings></Node></ChildNodes></Node>`
 
 	node, err := ryxnode.GenerateNodeFromXml(oldXml)
 	newXmlBytes, err := xml.Marshal(node)
@@ -213,7 +213,7 @@ func TestNodeToXml(t *testing.T) {
 		t.Fatalf(`expected no error but not '%v'`, err.Error())
 	}
 	if strings.ToUpper(oldXml) != strings.ToUpper(newXml) {
-		t.Fatalf(`expected '%v' but got '%v'`, newXml, oldXml)
+		t.Fatalf(`expected '%v' but got '%v'`, oldXml, newXml)
 	}
 	t.Logf(newXml)
 }
@@ -262,10 +262,10 @@ func TestSetPosition(t *testing.T) {
 }
 
 func TestSetPositionOfInvalidRyxNode(t *testing.T) {
-	node, _ := ryxnode.GenerateNodeFromXml(`<Node></Node>`)
+	node, _ := ryxnode.GenerateNodeFromXml(`<Node ToolID="1"></Node>`)
 	node.SetPosition(2, 4)
-	if encoded, _ := xml.Marshal(node); string(encoded) != `<Node></Node>` {
-		t.Fatalf(`expected no change to <Node></Node> but got %v`, string(encoded))
+	if encoded, _ := xml.Marshal(node); string(encoded) != `<Node ToolID="1"></Node>` {
+		t.Fatalf(`expected no change to <Node ToolID="1"></Node> but got %v`, string(encoded))
 	}
 }
 
@@ -314,8 +314,7 @@ func TestChangeChildNodes(t *testing.T) {
 }
 
 func TestNewMacroXmlNode(t *testing.T) {
-	macroXml := ryxnode.NewMacroXml(1, `macro.yxmc`, 5, 10)
-	macro := ryxnode.New(macroXml)
+	macro := ryxnode.NewMacro(1, `macro.yxmc`, 5, 10)
 	id, idErr := macro.ReadId()
 	if idErr != nil {
 		t.Fatalf(`expected no error retrieving ID but got %v`, idErr.Error())

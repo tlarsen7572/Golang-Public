@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
+	"fmt"
 	"github.com/tlarsen7572/Golang-Public/ryx/ini_reader"
 	"github.com/tlarsen7572/Golang-Public/ryx/ryxdoc"
 	"github.com/tlarsen7572/Golang-Public/txml"
@@ -138,11 +140,11 @@ func readJavascriptPluginTool(dir string) (ToolData, error) {
 	if err != nil {
 		return ToolData{}, err
 	}
-	xml, err := txml.Parse(string(content))
+	configXml, err := txml.Parse(string(content))
 	if err != nil {
 		return ToolData{}, err
 	}
-	iconFile := xml.First(`GuiSettings`).Attributes[`Icon`]
+	iconFile := configXml.First(`GuiSettings`).Attributes[`Icon`]
 
 	iconBytes, err := ioutil.ReadFile(filepath.Join(dir, iconFile))
 	var iconStr string
@@ -152,10 +154,10 @@ func readJavascriptPluginTool(dir string) (ToolData, error) {
 
 	inputs := make([]string, 0)
 	outputs := make([]string, 0)
-	for _, node := range xml.First(`GuiSettings`).First(`InputConnections`).Nodes {
+	for _, node := range configXml.First(`GuiSettings`).First(`InputConnections`).Nodes {
 		inputs = append(inputs, node.Attributes[`Name`])
 	}
-	for _, node := range xml.First(`GuiSettings`).First(`OutputConnections`).Nodes {
+	for _, node := range configXml.First(`GuiSettings`).First(`OutputConnections`).Nodes {
 		outputs = append(outputs, node.Attributes[`Name`])
 	}
 	toolData := ToolData{
@@ -220,13 +222,23 @@ func ReadSingleMacro(path string, macroPath string) (ToolData, error) {
 	icon = strings.Replace(icon, "\n", ``, -1)
 	inputs := make([]string, 0)
 	outputs := make([]string, 0)
-	for _, node := range macro.ReadNodes() {
+	for _, node := range macro.Nodes {
 		if node.ReadPlugin() == `AlteryxBasePluginsGui.MacroOutput.MacroOutput` {
-			name := node.ReadData().First(`Properties`).First(`Configuration`).First(`Name`).InnerText
+			var config *txml.Node
+			err := xml.Unmarshal([]byte(fmt.Sprintf(`<Configuration>%v</Configuration>`, node.Properties.Configuration.InnerXml)), &config)
+			if err != nil || config == nil {
+				continue
+			}
+			name := config.First(`Name`).InnerText
 			outputs = append(outputs, name)
 		}
 		if node.ReadPlugin() == `AlteryxBasePluginsGui.MacroInput.MacroInput` {
-			name := node.ReadData().First(`Properties`).First(`Configuration`).First(`Name`).InnerText
+			var config *txml.Node
+			err := xml.Unmarshal([]byte(fmt.Sprintf(`<Configuration>%v</Configuration>`, node.Properties.Configuration.InnerXml)), &config)
+			if err != nil || config == nil {
+				continue
+			}
+			name := config.First(`Name`).InnerText
 			inputs = append(inputs, name)
 		}
 	}

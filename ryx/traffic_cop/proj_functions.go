@@ -84,7 +84,7 @@ func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionRespo
 
 	nodes := []NodeStructure{}
 	toolData := []tool_data_loader.ToolData{}
-	for _, node := range doc.ReadNodes() {
+	for _, node := range doc.Nodes {
 		id, err := node.ReadId()
 		if err != nil {
 			continue
@@ -135,9 +135,14 @@ func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionRespo
 		}
 	}
 
+	connections := doc.Connections
+	if connections == nil {
+		connections = []*ryxdoc.RyxConn{}
+	}
+
 	docStructure := DocumentStructure{
 		Nodes:         nodes,
-		Connections:   doc.ReadAllConnections(),
+		Connections:   connections,
 		MacroToolData: toolData,
 	}
 	return FunctionResponse{nil, docStructure}

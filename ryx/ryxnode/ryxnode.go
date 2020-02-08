@@ -12,7 +12,20 @@ import (
 )
 
 type RyxNode struct {
-	data *txml.Node
+	ToolId         string
+	GuiSettings    *txml.Node
+	Properties     *Properties
+	EngineSettings *txml.Node
+	ChildNodes     []*RyxNode
+}
+
+type Properties struct {
+	Configuration Configuration `xml:"Configuration"`
+	Annotation    *txml.Node    `xml:"Annotation"`
+}
+
+type Configuration struct {
+	InnerXml string `xml:",innerxml"`
 }
 
 type Position struct {
@@ -29,32 +42,35 @@ type MacroPath struct {
 }
 
 func (ryxNode *RyxNode) ReadCategory() Category {
-	dll := ryxNode.data.First(`EngineSettings`).Attributes[`EngineDll`]
-	macro := ryxNode.data.First(`EngineSettings`).Attributes[`Macro`]
-	plugin := ryxNode.data.First(`GuiSettings`).Attributes[`Plugin`]
-	cosmeticPlugins := &h.StringArray{`AlteryxGuiToolkit.TextBox.TextBox`, `AlteryxGuiToolkit.HtmlBox.HtmlBox`}
-
+	dll := ryxNode.EngineSettings.Attributes[`EngineDll`]
 	if dll != "" {
 		return Tool
 	}
+
+	macro := ryxNode.EngineSettings.Attributes[`Macro`]
 	if macro != "" {
 		return Macro
 	}
+
+	cosmeticPlugins := &h.StringArray{`AlteryxGuiToolkit.TextBox.TextBox`, `AlteryxGuiToolkit.HtmlBox.HtmlBox`}
+	plugin := ryxNode.GuiSettings.Attributes[`Plugin`]
 	if cosmeticPlugins.Contains(plugin) {
 		return Cosmetic
 	}
+
 	if plugin == `AlteryxGuiToolkit.ToolContainer.ToolContainer` {
 		return Container
 	}
+
 	return Invalid
 }
 
 func (ryxNode *RyxNode) ReadId() (int, error) {
-	return strconv.Atoi(ryxNode.data.Attributes[`ToolID`])
+	return strconv.Atoi(ryxNode.ToolId)
 }
 
 func (ryxNode *RyxNode) ReadPosition() (Position, error) {
-	gui := ryxNode.data.First(`GuiSettings`).First(`Position`)
+	gui := ryxNode.GuiSettings.First(`Position`)
 	x, err := strconv.ParseFloat(gui.Attributes[`x`], 64)
 	if err != nil {
 		return Position{}, err
@@ -75,18 +91,18 @@ func (ryxNode *RyxNode) ReadPosition() (Position, error) {
 }
 
 func (ryxNode *RyxNode) ReadPlugin() string {
-	return ryxNode.data.First(`GuiSettings`).Attributes[`Plugin`]
+	return ryxNode.GuiSettings.Attributes[`Plugin`]
 }
 
 func (ryxNode *RyxNode) SetPosition(x float64, y float64) {
-	setting := ryxNode.data.First(`GuiSettings`).First(`Position`)
+	setting := ryxNode.GuiSettings.First(`Position`)
 	setting.Attributes = map[string]string{`x`: h.DblToStr(x, 0), `y`: h.DblToStr(y, 0)}
 }
 
 func (ryxNode *RyxNode) ReadMacro(macroPaths ...string) MacroPath {
-	stored := ryxNode.data.First(`EngineSettings`).Attributes[`Macro`]
+	stored := ryxNode.EngineSettings.Attributes[`Macro`]
 	if stored == `` {
-		return MacroPath{StoredPath: ``, FoundPath: ``}
+		return MacroPath{StoredPath: ``, FoundPath: ``, RelativeTo: ``}
 	}
 
 	osStored := strings.Replace(stored, `\`, string(os.PathSeparator), -1)
@@ -104,8 +120,7 @@ func (ryxNode *RyxNode) ReadMacro(macroPaths ...string) MacroPath {
 
 func (ryxNode *RyxNode) SetMacro(macro string) {
 	winMacro := strings.Replace(macro, string(os.PathSeparator), `\`, -1)
-	setting := ryxNode.data.First(`EngineSettings`)
-	setting.Attributes = map[string]string{`Macro`: winMacro}
+	ryxNode.EngineSettings.Attributes = map[string]string{`Macro`: winMacro}
 }
 
 func (ryxNode *RyxNode) MakeMacroAbsolute(macroPaths ...string) error {
@@ -132,26 +147,23 @@ func (ryxNode *RyxNode) MakeMacroRelative(to string, macroPaths ...string) error
 
 func (ryxNode *RyxNode) ReadChildren() []*RyxNode {
 	var list []*RyxNode
-	for _, child := range ryxNode.data.First(`ChildNodes`).Nodes {
-		node := New(child)
-		list = append(list, node)
-		list = append(list, node.ReadChildren()...)
+	for _, child := range ryxNode.ChildNodes {
+		list = append(list, child)
+		list = append(list, child.ReadChildren()...)
 	}
 	return list
 }
 
 func (ryxNode *RyxNode) RemoveChildren(ids ...int) {
 	currentIndex := 0
-	container := ryxNode.data.First(`ChildNodes`)
-	for _, childXml := range container.Nodes {
-		childNode := New(childXml)
+	for _, childNode := range ryxNode.ChildNodes {
 		if !childNode.MatchesIds(ids...) {
-			container.Nodes[currentIndex] = childXml
+			ryxNode.ChildNodes[currentIndex] = childNode
 			childNode.RemoveChildren(ids...)
 			currentIndex += 1
 		}
 	}
-	container.Nodes = container.Nodes[0:currentIndex]
+	ryxNode.ChildNodes = ryxNode.ChildNodes[0:currentIndex]
 }
 
 func (ryxNode *RyxNode) MatchesIds(ids ...int) bool {
@@ -165,11 +177,6 @@ func (ryxNode *RyxNode) MatchesIds(ids ...int) bool {
 		}
 	}
 	return false
-
-}
-
-func (ryxNode *RyxNode) ReadData() *txml.Node {
-	return ryxNode.data
 }
 
 type Category int
@@ -188,73 +195,44 @@ func (cat Category) String() string {
 	return categoryNames[cat]
 }
 
-func (ryxNode *RyxNode) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	return e.EncodeElement(ryxNode.data, start)
-}
-
-func (ryxNode *RyxNode) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	data := &txml.Node{}
-	err := d.DecodeElement(data, &start)
-	if err == nil {
-		ryxNode.data = data
+func NewMacro(id int, path string, x float64, y float64) *RyxNode {
+	return &RyxNode{
+		ToolId: strconv.Itoa(id),
+		GuiSettings: &txml.Node{
+			Name: "GuiSettings",
+			Nodes: []*txml.Node{
+				{
+					Name: `Position`,
+					Attributes: map[string]string{
+						`x`: h.DblToStr(x, 0),
+						`y`: h.DblToStr(y, 0),
+					},
+				},
+			},
+		},
+		Properties: &Properties{
+			Configuration: Configuration{InnerXml: "<Configuration />"},
+			Annotation: &txml.Node{
+				Name:       `Annotation`,
+				Attributes: map[string]string{`DisplayMode`: `0`},
+				Nodes: []*txml.Node{
+					{Name: `Name`},
+					{Name: `DefaultAnnotationText`},
+					{Name: `Left`, Attributes: map[string]string{`value`: `False`}},
+				},
+			},
+		},
+		EngineSettings: &txml.Node{
+			Name: `EngineSettings`,
+			Attributes: map[string]string{
+				`Macro`: path,
+			},
+		},
 	}
-	return err
 }
 
 func GenerateNodeFromXml(xmlString string) (*RyxNode, error) {
 	ayxNode := &RyxNode{}
 	err := xml.Unmarshal([]byte(xmlString), ayxNode)
 	return ayxNode, err
-}
-
-func New(node *txml.Node) *RyxNode {
-	return &RyxNode{node}
-}
-
-func NewMacroXml(id int, path string, x float64, y float64) *txml.Node {
-	path = strings.Replace(path, string(os.PathSeparator), `\`, -1)
-
-	return &txml.Node{
-		Name: `Node`,
-		Attributes: map[string]string{
-			`ToolID`: strconv.Itoa(id),
-		},
-		Nodes: []*txml.Node{
-			{
-				Name: `GuiSettings`,
-				Nodes: []*txml.Node{
-					{
-						Name: `Position`,
-						Attributes: map[string]string{
-							`x`: h.DblToStr(x, 0),
-							`y`: h.DblToStr(y, 0),
-						},
-					},
-				},
-			},
-			{
-				Name: `Properties`,
-				Nodes: []*txml.Node{
-					{
-						Name: `Configuration`,
-					},
-					{
-						Name:       `Annotation`,
-						Attributes: map[string]string{`DisplayMode`: `0`},
-						Nodes: []*txml.Node{
-							{Name: `Name`},
-							{Name: `DefaultAnnotationText`},
-							{Name: `Left`, Attributes: map[string]string{`value`: `False`}},
-						},
-					},
-				},
-			},
-			{
-				Name: `EngineSettings`,
-				Attributes: map[string]string{
-					`Macro`: path,
-				},
-			},
-		},
-	}
 }

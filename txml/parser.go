@@ -33,6 +33,10 @@ func NilNode() *Node {
 	return &Node{Name: ``, Attributes: map[string]string{}, InnerText: ``, Nodes: []*Node{}}
 }
 
+func (node *Node) IsNil() bool {
+	return node.Name == `` && len(node.Attributes) == 0 && len(node.Nodes) == 0 && node.InnerText == ``
+}
+
 func (node *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	node.Attributes = make(map[string]string)
 	for _, attr := range start.Attr {
