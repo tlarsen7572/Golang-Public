@@ -46,7 +46,7 @@ func (ryxProject *RyxProject) ReadPath() string {
 	return ryxProject.path
 }
 
-func (ryxProject *RyxProject) RenameMacro(macro string, newPath string) error {
+func (ryxProject *RyxProject) RenameFile(oldPath string, newPath string) error {
 	docs, err := ryxProject.Docs()
 	if err != nil {
 		return err
@@ -57,12 +57,12 @@ func (ryxProject *RyxProject) RenameMacro(macro string, newPath string) error {
 		}
 		folder := filepath.Dir(path)
 		macroPaths := ryxProject.generateMacroPaths(folder)
-		renamed := doc.RenameMacroNodes(macro, newPath, macroPaths...)
+		renamed := doc.RenameMacroNodes(oldPath, newPath, macroPaths...)
 		if renamed > 0 {
 			doc.Save(path)
 		}
 	}
-	return os.Rename(macro, newPath)
+	return os.Rename(oldPath, newPath)
 }
 
 func (ryxProject *RyxProject) MakeAllMacrosAbsolute() int {

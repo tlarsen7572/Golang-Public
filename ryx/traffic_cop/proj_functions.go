@@ -218,7 +218,7 @@ func renameFile(call FunctionCall, data *TrafficCopData) FunctionResponse {
 			Response: nil,
 		}
 	}
-	err := data.Project.RenameMacro(from, to)
+	err := data.Project.RenameFile(from, to)
 	return FunctionResponse{
 		Err:      err,
 		Response: nil,

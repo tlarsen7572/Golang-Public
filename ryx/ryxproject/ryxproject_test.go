@@ -51,7 +51,7 @@ func TestRenameMacro(t *testing.T) {
 	proj, _ := ryxproject.Open(baseFolder)
 	oldFile, _ := generateAbsPath(baseFolder, `macros`, `Tag with Sets.yxmc`)
 	newFile, _ := generateAbsPath(baseFolder, `macros`, `Tag.yxmc`)
-	err := proj.RenameMacro(oldFile, newFile)
+	err := proj.RenameFile(oldFile, newFile)
 	if err != nil {
 		r.RebuildTestdocs(baseFolder)
 		t.Fatalf(`expected no error but got: %v`, err)
