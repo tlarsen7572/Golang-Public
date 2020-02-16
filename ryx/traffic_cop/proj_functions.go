@@ -30,6 +30,7 @@ const getProjectStructureFunc = `GetProjectStructure`
 const getDocumentStructureFunc = `GetDocumentStructure`
 const whereUsedFunc = `WhereUsed`
 const renameFileFunc = `RenameFile`
+const moveFilesFunc = `MoveFiles`
 const makeMacroAbsoluteFunc = `MakeMacroAbsolute`
 const makeMacroRelativeFunc = `MakeMacroRelative`
 const makeAllRelativeFunc = `MakeAllMacrosRelative`
@@ -46,6 +47,8 @@ func handleProjFunction(call FunctionCall, data *TrafficCopData) FunctionRespons
 		return whereUsed(call, data)
 	case renameFileFunc:
 		return renameFile(call, data)
+	case moveFilesFunc:
+		return moveFiles(call, data)
 	case makeMacroAbsoluteFunc:
 		return makeMacroAbsolute(call, data)
 	case makeMacroRelativeFunc:
@@ -70,8 +73,8 @@ func getProjectStructure(data *TrafficCopData) FunctionResponse {
 func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionResponse {
 	var filePath string
 	var ok bool
-	if filePath, ok = call.Parameters[`FilePath`]; !ok {
-		return FunctionResponse{errors.New(`the FilePath parameter was not included`), nil}
+	if filePath, ok = call.Parameters[`FilePath`].(string); !ok {
+		return FunctionResponse{errors.New(`the FilePath parameter was not included or was not a string`), nil}
 	}
 
 	doc, err := data.Project.RetrieveDocument(filePath)
@@ -149,19 +152,19 @@ func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionRespo
 }
 
 func whereUsed(call FunctionCall, data *TrafficCopData) FunctionResponse {
-	path, ok := call.Parameters[`FilePath`]
+	path, ok := call.Parameters[`FilePath`].(string)
 	if !ok {
-		return FunctionResponse{errors.New(`the FilePath parameter was not included`), nil}
+		return FunctionResponse{errors.New(`the FilePath parameter was not included or was not a string`), nil}
 	}
 	whereUsed := data.Project.WhereUsed(path)
 	return FunctionResponse{nil, whereUsed}
 }
 
 func makeMacroAbsolute(call FunctionCall, data *TrafficCopData) FunctionResponse {
-	macro, ok := call.Parameters[`Macro`]
+	macro, ok := call.Parameters[`Macro`].(string)
 	if !ok {
 		return FunctionResponse{
-			Err:      errors.New(`the Macro parameter was not included`),
+			Err:      errors.New(`the Macro parameter was not included or was not a string`),
 			Response: nil,
 		}
 	}
@@ -173,10 +176,10 @@ func makeMacroAbsolute(call FunctionCall, data *TrafficCopData) FunctionResponse
 }
 
 func makeMacroRelative(call FunctionCall, data *TrafficCopData) FunctionResponse {
-	macro, ok := call.Parameters[`Macro`]
+	macro, ok := call.Parameters[`Macro`].(string)
 	if !ok {
 		return FunctionResponse{
-			Err:      errors.New(`the Macro parameter was not included`),
+			Err:      errors.New(`the Macro parameter was not included or was not a string`),
 			Response: nil,
 		}
 	}
@@ -204,17 +207,17 @@ func makeAllAbsolute(data *TrafficCopData) FunctionResponse {
 }
 
 func renameFile(call FunctionCall, data *TrafficCopData) FunctionResponse {
-	from, ok := call.Parameters[`From`]
+	from, ok := call.Parameters[`From`].(string)
 	if !ok {
 		return FunctionResponse{
-			Err:      errors.New(`the From parameter was not included`),
+			Err:      errors.New(`the From parameter was not included or was not a string`),
 			Response: nil,
 		}
 	}
-	to, ok := call.Parameters[`To`]
+	to, ok := call.Parameters[`To`].(string)
 	if !ok {
 		return FunctionResponse{
-			Err:      errors.New(`the To parameter was not included`),
+			Err:      errors.New(`the To parameter was not included or was not a string`),
 			Response: nil,
 		}
 	}
@@ -222,5 +225,41 @@ func renameFile(call FunctionCall, data *TrafficCopData) FunctionResponse {
 	return FunctionResponse{
 		Err:      err,
 		Response: nil,
+	}
+}
+
+func moveFiles(call FunctionCall, data *TrafficCopData) FunctionResponse {
+	from, ok := call.Parameters[`Files`].([]interface{})
+	fromStrs := []string{}
+	ok2 := true
+	var valueStr string
+	for _, value := range from {
+		valueStr, ok2 = value.(string)
+		if !ok2 {
+			break
+		}
+		fromStrs = append(fromStrs, valueStr)
+	}
+	if !ok || !ok2 {
+		return FunctionResponse{
+			Err:      errors.New(`the Files parameter was not included or was not a list of strings`),
+			Response: nil,
+		}
+	}
+	to, ok := call.Parameters[`MoveTo`].(string)
+	if !ok {
+		return FunctionResponse{
+			Err:      errors.New(`the MoveTo parameter was not included or was not a string`),
+			Response: nil,
+		}
+	}
+	errs := data.Project.MoveFiles(fromStrs, to)
+	errsText := []string{}
+	for _, err := range errs {
+		errsText = append(errsText, err.Error())
+	}
+	return FunctionResponse{
+		Err:      nil,
+		Response: errsText,
 	}
 }

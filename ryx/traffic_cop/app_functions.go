@@ -8,7 +8,7 @@ import (
 const browseFolderFunc = `BrowseFolder`
 const getToolDataFunc = `GetToolData`
 const invalidAppFunc = `invalid app function`
-const missingFolderPath = `the FolderPath parameter is missing`
+const missingFolderPath = `the FolderPath parameter was missing or was not a string`
 
 func handleAppFunction(call FunctionCall) FunctionResponse {
 	switch call.Function {
@@ -22,7 +22,7 @@ func handleAppFunction(call FunctionCall) FunctionResponse {
 }
 
 func browseFolder(call FunctionCall) FunctionResponse {
-	folderPath, ok := call.Parameters[`FolderPath`]
+	folderPath, ok := call.Parameters[`FolderPath`].(string)
 	if !ok {
 		return FunctionResponse{errors.New(missingFolderPath), nil}
 	}

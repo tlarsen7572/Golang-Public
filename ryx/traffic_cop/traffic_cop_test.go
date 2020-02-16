@@ -14,7 +14,12 @@ import (
 
 var workFolder, _ = filepath.Abs(filepath.Join(`..`, `testdocs`))
 
+type params map[string]interface{}
+
 func TestChannelInvalidProject(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -28,6 +33,9 @@ func TestChannelInvalidProject(t *testing.T) {
 }
 
 func TestInvalidFunction(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -41,6 +49,9 @@ func TestInvalidFunction(t *testing.T) {
 }
 
 func TestGetProjectStructure(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -62,6 +73,9 @@ func TestGetProjectStructure(t *testing.T) {
 }
 
 func TestGetDocumentStructure(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	var doc, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `01 SETLEAF Equations Completed.yxmd`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
@@ -70,7 +84,7 @@ func TestGetDocumentStructure(t *testing.T) {
 	in <- cop.FunctionCall{
 		Project:    workFolder,
 		Function:   `GetDocumentStructure`,
-		Parameters: map[string]string{`FilePath`: doc},
+		Parameters: params{`FilePath`: doc},
 		Out:        out,
 		Config: &config.Config{
 			ToolData: []tool_data_loader.ToolData{},
@@ -94,6 +108,9 @@ func TestGetDocumentStructure(t *testing.T) {
 }
 
 func TestGetDocStructureHasMacroToolData(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	var doc, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `01 SETLEAF Equations Completed.yxmd`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
@@ -102,7 +119,7 @@ func TestGetDocStructureHasMacroToolData(t *testing.T) {
 	in <- cop.FunctionCall{
 		Project:    workFolder,
 		Function:   `GetDocumentStructure`,
-		Parameters: map[string]string{`FilePath`: doc},
+		Parameters: params{`FilePath`: doc},
 		Out:        out,
 		Config: &config.Config{
 			ToolData: []tool_data_loader.ToolData{},
@@ -120,12 +137,14 @@ func TestGetDocStructureHasMacroToolData(t *testing.T) {
 
 func TestGetDocumentStructureExcludesInvalidNodes(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	var doc, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `Calculate Filter Expression.yxmc`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
 
-	in <- cop.FunctionCall{Project: workFolder, Function: `GetDocumentStructure`, Parameters: map[string]string{`FilePath`: doc}, Out: out, Config: &config.Config{}}
+	in <- cop.FunctionCall{Project: workFolder, Function: `GetDocumentStructure`, Parameters: map[string]interface{}{`FilePath`: doc}, Out: out, Config: &config.Config{}}
 	response := <-out
 	if response.Err != nil {
 		t.Fatalf(`expected no error but got: %v`, response.Err)
@@ -137,6 +156,9 @@ func TestGetDocumentStructureExcludesInvalidNodes(t *testing.T) {
 }
 
 func TestGetRootFolders(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -145,7 +167,7 @@ func TestGetRootFolders(t *testing.T) {
 		Out:        out,
 		Project:    ``,
 		Function:   `BrowseFolder`,
-		Parameters: map[string]string{`FolderPath`: ``},
+		Parameters: params{`FolderPath`: ``},
 		Config:     &config.Config{BrowseFolderRoots: []string{`C:`, `D:`}},
 	}
 	response := <-out
@@ -166,6 +188,9 @@ func TestGetRootFolders(t *testing.T) {
 }
 
 func TestBrowseFoldersWithoutFolderPath(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -174,7 +199,7 @@ func TestBrowseFoldersWithoutFolderPath(t *testing.T) {
 		Out:        out,
 		Project:    ``,
 		Function:   `BrowseFolder`,
-		Parameters: map[string]string{},
+		Parameters: params{},
 		Config:     &config.Config{BrowseFolderRoots: []string{`C:`, `D:`}},
 	}
 	response := <-out
@@ -184,6 +209,9 @@ func TestBrowseFoldersWithoutFolderPath(t *testing.T) {
 }
 
 func TestGetIcons(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -192,7 +220,7 @@ func TestGetIcons(t *testing.T) {
 		Out:        out,
 		Project:    ``,
 		Function:   `GetToolData`,
-		Parameters: map[string]string{},
+		Parameters: params{},
 		Config: &config.Config{
 			ToolData: []tool_data_loader.ToolData{
 				{
@@ -222,12 +250,14 @@ func TestGetIcons(t *testing.T) {
 
 func TestGetEmptyWorkflow(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	var doc, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `New Workflow 1.yxwz`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
 
-	in <- cop.FunctionCall{Project: workFolder, Function: `GetDocumentStructure`, Parameters: map[string]string{`FilePath`: doc}, Out: out, Config: &config.Config{}}
+	in <- cop.FunctionCall{Project: workFolder, Function: `GetDocumentStructure`, Parameters: map[string]interface{}{`FilePath`: doc}, Out: out, Config: &config.Config{}}
 	response := <-out
 	if response.Err != nil {
 		t.Fatalf(`expected no error but got: %v`, response.Err)
@@ -243,12 +273,14 @@ func TestGetEmptyWorkflow(t *testing.T) {
 
 func TestWhereUsed(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	var doc, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `Calculate Filter Expression.yxmc`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
 
-	in <- cop.FunctionCall{Project: workFolder, Function: `WhereUsed`, Parameters: map[string]string{`FilePath`: doc}, Out: out, Config: &config.Config{}}
+	in <- cop.FunctionCall{Project: workFolder, Function: `WhereUsed`, Parameters: params{`FilePath`: doc}, Out: out, Config: &config.Config{}}
 	response := <-out
 	if response.Err != nil {
 		t.Fatalf(`expected no error but got: %v`, response.Err.Error())
@@ -261,6 +293,8 @@ func TestWhereUsed(t *testing.T) {
 
 func TestRenameFile(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	from, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `Calculate Filter Expression.yxmc`))
 	to, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `macros`, `Calculate Filter Expression.yxmc`))
 	in := make(chan cop.FunctionCall)
@@ -271,7 +305,7 @@ func TestRenameFile(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   `RenameFile`,
-		Parameters: map[string]string{`From`: from, `To`: to},
+		Parameters: params{`From`: from, `To`: to},
 		Config:     &config.Config{},
 	}
 	response := <-out
@@ -286,10 +320,14 @@ func TestRenameFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
-	rebuildTestDocs()
 }
 
-func TestMoveFileMissingFrom(t *testing.T) {
+func TestMoveFileInvalidFrom(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	from, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `Calculate Filter Expression.yxmc`))
+	to, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `macros`, `Calculate Filter Expression.yxmc`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -298,19 +336,101 @@ func TestMoveFileMissingFrom(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   `RenameFile`,
-		Parameters: map[string]string{`To`: `Something`},
+		Parameters: params{`From`: []string{from}, `To`: to},
 		Config:     &config.Config{},
 	}
 	response := <-out
 	if response.Err == nil {
 		t.Fatalf(`expected an error but got none`)
 	}
-	if response.Err.Error() != `the From parameter was not included` {
-		t.Fatalf(`expected error 'the From parameter was not included' but got '%v'`, response.Err.Error())
+	if response.Err.Error() != `the From parameter was not included or was not a string` {
+		t.Fatalf(`expected error 'the From parameter was not included or was not a string' but got '%v'`, response.Err.Error())
+	}
+}
+
+func TestMoveFileMissingFrom(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   `RenameFile`,
+		Parameters: params{`MoveTo`: `Something`},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err == nil {
+		t.Fatalf(`expected an error but got none`)
+	}
+	if response.Err.Error() != `the From parameter was not included or was not a string` {
+		t.Fatalf(`expected error 'the From parameter was not included or was not a string' but got '%v'`, response.Err.Error())
+	}
+}
+
+func TestMoveFiles(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	file1, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `Calculate Filter Expression.yxmc`))
+	file2, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmc`))
+	files := []interface{}{
+		file1,
+		file2,
+	}
+	moveTo, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `macros`))
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   `MoveFiles`,
+		Parameters: params{`Files`: files, `MoveTo`: moveTo},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err != nil {
+		t.Fatalf(`expected no error but got: %v`, response.Err.Error())
+	}
+	errs := response.Response.([]string)
+	if count := len(errs); count > 0 {
+		t.Fatalf(`expected no errors but got %v`, count)
+	}
+}
+
+func TestMoveFilesInvalidFilesParam(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	files := []interface{}{1, 2}
+	moveTo, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `macros`))
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   `MoveFiles`,
+		Parameters: params{`Files`: files, `MoveTo`: moveTo},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err == nil {
+		t.Fatalf(`expected an error but got none`)
 	}
 }
 
 func TestMoveFileMissingTo(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -319,20 +439,22 @@ func TestMoveFileMissingTo(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   `RenameFile`,
-		Parameters: map[string]string{`From`: `Something`},
+		Parameters: params{`From`: `Something`},
 		Config:     &config.Config{},
 	}
 	response := <-out
 	if response.Err == nil {
 		t.Fatalf(`expected an error but got none`)
 	}
-	if response.Err.Error() != `the To parameter was not included` {
-		t.Fatalf(`expected error 'the To parameter was not included' but got '%v'`, response.Err.Error())
+	if response.Err.Error() != `the To parameter was not included or was not a string` {
+		t.Fatalf(`expected error 'the To parameter was not included or was not a string' but got '%v'`, response.Err.Error())
 	}
 }
 
 func TestAnchorOrder(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	var doc, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmd`))
 	var macro, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmc`))
 	in := make(chan cop.FunctionCall)
@@ -343,7 +465,7 @@ func TestAnchorOrder(t *testing.T) {
 		in <- cop.FunctionCall{
 			Project:    workFolder,
 			Function:   `GetDocumentStructure`,
-			Parameters: map[string]string{`FilePath`: doc},
+			Parameters: params{`FilePath`: doc},
 			Out:        out,
 			Config: &config.Config{
 				ToolData: []tool_data_loader.ToolData{},
@@ -387,6 +509,8 @@ func TestAnchorOrder(t *testing.T) {
 
 func TestMakeMacroAbsolute(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	var macro, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmc`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
@@ -396,7 +520,7 @@ func TestMakeMacroAbsolute(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   "MakeMacroAbsolute",
-		Parameters: map[string]string{"Macro": macro},
+		Parameters: params{"Macro": macro},
 		Config:     &config.Config{},
 	}
 
@@ -408,11 +532,12 @@ func TestMakeMacroAbsolute(t *testing.T) {
 	if changed != 1 {
 		t.Fatalf(`expected 1 document to be changed but got %v`, changed)
 	}
-	rebuildTestDocs()
 }
 
 func TestMakeMacroAbsoluteMissingMacro(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -421,7 +546,7 @@ func TestMakeMacroAbsoluteMissingMacro(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   "MakeMacroAbsolute",
-		Parameters: map[string]string{},
+		Parameters: params{},
 		Config:     &config.Config{},
 	}
 
@@ -434,6 +559,8 @@ func TestMakeMacroAbsoluteMissingMacro(t *testing.T) {
 
 func TestMakeMacroRelative(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	var macro, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmc`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
@@ -443,7 +570,7 @@ func TestMakeMacroRelative(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   "MakeMacroRelative",
-		Parameters: map[string]string{"Macro": macro},
+		Parameters: params{"Macro": macro},
 		Config:     &config.Config{},
 	}
 
@@ -455,11 +582,12 @@ func TestMakeMacroRelative(t *testing.T) {
 	if changed != 1 {
 		t.Fatalf(`expected 1 document to be changed but got %v`, changed)
 	}
-	rebuildTestDocs()
 }
 
 func TestMakeMacroRelativeMissingMacro(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -468,7 +596,7 @@ func TestMakeMacroRelativeMissingMacro(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   "MakeMacroRelative",
-		Parameters: map[string]string{},
+		Parameters: params{},
 		Config:     &config.Config{},
 	}
 
@@ -481,6 +609,8 @@ func TestMakeMacroRelativeMissingMacro(t *testing.T) {
 
 func TestMakeAllMacrosRelative(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -489,7 +619,7 @@ func TestMakeAllMacrosRelative(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   "MakeAllMacrosRelative",
-		Parameters: map[string]string{},
+		Parameters: params{},
 		Config:     &config.Config{},
 	}
 	response := <-out
@@ -500,11 +630,12 @@ func TestMakeAllMacrosRelative(t *testing.T) {
 	if changed != 2 {
 		t.Fatalf(`expected 2 changed documents but got %v`, changed)
 	}
-	rebuildTestDocs()
 }
 
 func TestMakeAllMacrosAbsolute(t *testing.T) {
 	rebuildTestDocs()
+	defer rebuildTestDocs()
+
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -513,7 +644,7 @@ func TestMakeAllMacrosAbsolute(t *testing.T) {
 		Out:        out,
 		Project:    workFolder,
 		Function:   "MakeAllMacrosAbsolute",
-		Parameters: map[string]string{},
+		Parameters: params{},
 		Config:     &config.Config{},
 	}
 	response := <-out
@@ -524,7 +655,6 @@ func TestMakeAllMacrosAbsolute(t *testing.T) {
 	if changed != 2 {
 		t.Fatalf(`expected 2 changed documents but got %v`, changed)
 	}
-	rebuildTestDocs()
 }
 
 func TestInterfaceNodesDocumentStructure(t *testing.T) {
@@ -536,7 +666,7 @@ func TestInterfaceNodesDocumentStructure(t *testing.T) {
 	in <- cop.FunctionCall{
 		Project:    workFolder,
 		Function:   `GetDocumentStructure`,
-		Parameters: map[string]string{`FilePath`: doc},
+		Parameters: params{`FilePath`: doc},
 		Out:        out,
 		Config: &config.Config{
 			ToolData: []tool_data_loader.ToolData{},

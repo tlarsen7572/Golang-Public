@@ -20,7 +20,7 @@ type FunctionCall struct {
 	Out        chan FunctionResponse
 	Project    string
 	Function   string
-	Parameters map[string]string
+	Parameters map[string]interface{}
 	Config     *config.Config
 }
 

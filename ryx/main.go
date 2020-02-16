@@ -50,13 +50,13 @@ func main() {
 	if err != nil {
 		writeLog(log, err.Error())
 	}
-	log.Close()
+	_ = log.Close()
 }
 
 type RequestPayload struct {
 	Function   string
 	Project    string
-	Parameters map[string]string
+	Parameters map[string]interface{}
 }
 
 type ResponsePayload struct {
@@ -111,7 +111,7 @@ func handleFile(w http.ResponseWriter, r *http.Request) {
 func writeLog(log *os.File, msg string) {
 	timestamp := time.Now().Format(time.RFC3339)
 	entry := fmt.Sprintf(`%v - %v`, timestamp, msg)
-	log.WriteString(entry)
+	_, _ = log.WriteString(entry)
 }
 
 func sendNormalResponse(w http.ResponseWriter, data interface{}) {
@@ -120,10 +120,10 @@ func sendNormalResponse(w http.ResponseWriter, data interface{}) {
 	responseBytes, marshalErr := json.Marshal(response)
 	if marshalErr != nil {
 		buffer := bytes.NewBufferString(marshalErr.Error())
-		w.Write(buffer.Bytes())
+		_, _ = w.Write(buffer.Bytes())
 		return
 	}
-	w.Write(responseBytes)
+	_, _ = w.Write(responseBytes)
 }
 
 func sendErrorResponse(w http.ResponseWriter, err string) {
@@ -132,10 +132,10 @@ func sendErrorResponse(w http.ResponseWriter, err string) {
 	responseBytes, marshalErr := json.Marshal(response)
 	if marshalErr != nil {
 		var buffer = bytes.NewBufferString(marshalErr.Error())
-		w.Write(buffer.Bytes())
+		_, _ = w.Write(buffer.Bytes())
 		return
 	}
-	w.Write(responseBytes)
+	_, _ = w.Write(responseBytes)
 }
 
 func setHeaders(w http.ResponseWriter, contentType string) {

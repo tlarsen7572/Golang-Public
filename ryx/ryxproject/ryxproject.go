@@ -65,6 +65,19 @@ func (ryxProject *RyxProject) RenameFile(oldPath string, newPath string) error {
 	return os.Rename(oldPath, newPath)
 }
 
+func (ryxProject *RyxProject) MoveFiles(files []string, moveTo string) []error {
+	errs := []error{}
+	for _, file := range files {
+		_, name := filepath.Split(file)
+		newPath := filepath.Join(moveTo, name)
+		err := ryxProject.RenameFile(file, newPath)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
+}
+
 func (ryxProject *RyxProject) MakeAllMacrosAbsolute() int {
 	docs, err := ryxProject.Docs()
 	if err != nil {
