@@ -44503,7 +44503,7 @@ ha:function(a,b,c){return this.Tc(a,b,c)},
 Tc:function(a,b,c){var u=0,t=P.F(P.i),s,r=this
 var $async$ha=P.A(function(d,e){if(d===1)return P.C(e,t)
 while(true)switch(u){case 0:u=3
-return P.B(r.e6("RenameFile",P.au(["Files",b,"MoveTo",c],P.i,P.L),a),$async$ha)
+return P.B(r.e6("MoveFiles",P.au(["Files",b,"MoveTo",c],P.i,P.L),a),$async$ha)
 case 3:s=e
 u=1
 break
