@@ -253,13 +253,9 @@ func moveFiles(call FunctionCall, data *TrafficCopData) FunctionResponse {
 			Response: nil,
 		}
 	}
-	errs := data.Project.MoveFiles(fromStrs, to)
-	errsText := []string{}
-	for _, err := range errs {
-		errsText = append(errsText, err.Error())
-	}
+	errFiles := data.Project.MoveFiles(fromStrs, to)
 	return FunctionResponse{
 		Err:      nil,
-		Response: errsText,
+		Response: errFiles,
 	}
 }

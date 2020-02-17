@@ -59,23 +59,23 @@ func (ryxProject *RyxProject) RenameFile(oldPath string, newPath string) error {
 		macroPaths := ryxProject.generateMacroPaths(folder)
 		renamed := doc.RenameMacroNodes(oldPath, newPath, macroPaths...)
 		if renamed > 0 {
-			doc.Save(path)
+			_ = doc.Save(path)
 		}
 	}
 	return os.Rename(oldPath, newPath)
 }
 
-func (ryxProject *RyxProject) MoveFiles(files []string, moveTo string) []error {
-	errs := []error{}
+func (ryxProject *RyxProject) MoveFiles(files []string, moveTo string) (errFiles []string) {
+	errFiles = []string{}
 	for _, file := range files {
 		_, name := filepath.Split(file)
 		newPath := filepath.Join(moveTo, name)
 		err := ryxProject.RenameFile(file, newPath)
 		if err != nil {
-			errs = append(errs, err)
+			errFiles = append(errFiles, file)
 		}
 	}
-	return errs
+	return errFiles
 }
 
 func (ryxProject *RyxProject) MakeAllMacrosAbsolute() int {
@@ -90,7 +90,7 @@ func (ryxProject *RyxProject) MakeAllMacrosAbsolute() int {
 		changed := doc.MakeAllMacrosAbsolute(macroPaths...)
 		if changed > 0 {
 			docsChanged++
-			doc.Save(path)
+			_ = doc.Save(path)
 		}
 	}
 	return docsChanged
@@ -108,7 +108,7 @@ func (ryxProject *RyxProject) MakeMacroAbsolute(macroAbsPath string) int {
 		changed := doc.MakeMacroAbsolute(macroAbsPath, macroPaths...)
 		if changed > 0 {
 			docsChanged++
-			doc.Save(path)
+			_ = doc.Save(path)
 		}
 	}
 	return docsChanged
@@ -126,7 +126,7 @@ func (ryxProject *RyxProject) MakeAllMacrosRelative() int {
 		changed := doc.MakeAllMacrosRelative(folder, macroPaths...)
 		if changed > 0 {
 			docsChanged++
-			doc.Save(path)
+			_ = doc.Save(path)
 		}
 	}
 	return docsChanged
@@ -144,7 +144,7 @@ func (ryxProject *RyxProject) MakeMacroRelative(macroAbsPath string) int {
 		changed := doc.MakeMacroRelative(macroAbsPath, folder, macroPaths...)
 		if changed > 0 {
 			docsChanged++
-			doc.Save(path)
+			_ = doc.Save(path)
 		}
 	}
 	return docsChanged
