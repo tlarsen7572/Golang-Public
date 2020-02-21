@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-var baseFolder = filepath.Join(`..`, `testdocs`)
+var baseFolder, _ = filepath.Abs(filepath.Join(`..`, `testdocs`))
 
 func TestOpenProject(t *testing.T) {
 	r.RebuildTestdocs(baseFolder)
@@ -52,16 +52,19 @@ func TestOpenFileRatherThanFolder(t *testing.T) {
 	}
 }
 
-func TestRenameMacro(t *testing.T) {
+func TestRenameFiles(t *testing.T) {
 	r.RebuildTestdocs(baseFolder)
 	defer r.RebuildTestdocs(baseFolder)
 
 	proj, _ := ryxproject.Open(baseFolder)
 	oldFile, _ := generateAbsPath(baseFolder, `macros`, `Tag with Sets.yxmc`)
 	newFile, _ := generateAbsPath(baseFolder, `macros`, `Tag.yxmc`)
-	err := proj.RenameFile(oldFile, newFile)
+	errFiles, err := proj.RenameFiles([]string{oldFile}, []string{newFile})
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err)
+	}
+	if count := len(errFiles); count > 0 {
+		t.Fatalf(`expected 0 file errors but got %v`, count)
 	}
 	if _, err := os.Stat(oldFile); !os.IsNotExist(err) {
 		t.Fatalf(`expected '%v' to not exist but it does`, oldFile)
@@ -82,12 +85,23 @@ func TestRenameMacro(t *testing.T) {
 	}
 }
 
+func TestRenameFilesWithUnequalLists(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	defer r.RebuildTestdocs(baseFolder)
+
+	proj, _ := ryxproject.Open(baseFolder)
+	_, err := proj.RenameFiles([]string{`A`}, []string{`B`, `C`})
+	if err == nil {
+		t.Fatalf(`expected an error but none occurred`)
+	}
+}
+
 func TestMakeAllMacrosAbsoluteAndRelative(t *testing.T) {
 	r.RebuildTestdocs(baseFolder)
 	defer r.RebuildTestdocs(baseFolder)
 
 	proj, _ := ryxproject.Open(baseFolder)
-	changed := proj.MakeAllMacrosAbsolute()
+	changed := proj.MakeAllFilesAbsolute()
 	if changed != 2 {
 		t.Fatalf(`expected 2 doc changed but got %v`, changed)
 	}
@@ -105,7 +119,7 @@ func TestMakeAllMacrosAbsoluteAndRelative(t *testing.T) {
 		t.Fatalf(`expected stored path of '%v' but got '%v'`, expected2, actual)
 	}
 
-	proj.MakeAllMacrosRelative()
+	proj.MakeAllFilesRelative()
 	if changed != 2 {
 		t.Fatalf(`expected 2 doc changed but got %v`, changed)
 	}
@@ -127,7 +141,7 @@ func TestMakeMacroAbsoluteAndRelative(t *testing.T) {
 
 	proj, _ := ryxproject.Open(baseFolder)
 	macro, _ := generateAbsPath(baseFolder, `Calculate Filter Expression.yxmc`)
-	changed := proj.MakeMacroAbsolute(macro)
+	changed := proj.MakeFilesAbsolute([]string{macro})
 	if changed != 1 {
 		t.Fatalf(`expected 1 doc changed but got %v`, changed)
 	}
@@ -144,7 +158,7 @@ func TestMakeMacroAbsoluteAndRelative(t *testing.T) {
 		t.Fatalf(`expected stored path of '%v' but got '%v'`, expected2, actual)
 	}
 
-	proj.MakeMacroRelative(macro)
+	proj.MakeFilesRelative([]string{macro})
 	if changed != 1 {
 		t.Fatalf(`expected 1 doc changed but got %v`, changed)
 	}
@@ -158,6 +172,37 @@ func TestMakeMacroAbsoluteAndRelative(t *testing.T) {
 	if actual := nodes[18].ReadMacro().StoredPath; actual != expected2 {
 		t.Fatalf(`expected stored path of '%v' but got '%v'`, expected2, actual)
 	}
+}
+
+func TestMakeWorkflowRelativeAndAbsolute(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	defer r.RebuildTestdocs(baseFolder)
+
+	proj, _ := ryxproject.Open(baseFolder)
+	workflow, _ := generateAbsPath(baseFolder, `01 SETLEAF Equations Completed.yxmd`)
+
+	changed := proj.MakeFilesAbsolute([]string{workflow})
+	if changed != 1 {
+		t.Fatalf(`expected 1 changed file but got %v`, changed)
+	}
+	doc, _ := ryxdoc.ReadFile(workflow)
+	macro := doc.ReadMappedNodes()[18].ReadMacro()
+	expectedStoredPath := strings.Replace(filepath.Join(baseFolder, `macros`, `Tag with Sets.yxmc`), string(os.PathSeparator), `\`, -1)
+	if macro.StoredPath != expectedStoredPath {
+		t.Fatalf(`expected stored path '%v' but got '%v'`, expectedStoredPath, macro.StoredPath)
+	}
+
+	changed = proj.MakeFilesRelative([]string{workflow})
+	if changed != 1 {
+		t.Fatalf(`expected 1 changed file but got %v`, changed)
+	}
+	doc, _ = ryxdoc.ReadFile(workflow)
+	macro = doc.ReadMappedNodes()[18].ReadMacro()
+	expectedStoredPath = strings.Replace(filepath.Join(`macros`, `Tag with Sets.yxmc`), string(os.PathSeparator), `\`, -1)
+	if macro.StoredPath != expectedStoredPath {
+		t.Fatalf(`expected stored path '%v' but got '%v'`, expectedStoredPath, macro.StoredPath)
+	}
+
 }
 
 func TestRetrieveDocument(t *testing.T) {
@@ -179,13 +224,13 @@ func TestWhereUsed(t *testing.T) {
 	r.RebuildTestdocs(baseFolder)
 	defer r.RebuildTestdocs(baseFolder)
 
-	docPath, _ := filepath.Abs(filepath.Join(baseFolder, `Calculate Filter Expression.yxmc`))
+	docPath := filepath.Join(baseFolder, `Calculate Filter Expression.yxmc`)
 	proj, _ := ryxproject.Open(baseFolder)
 	usages := proj.WhereUsed(docPath)
 	if count := len(usages); count != 1 {
 		t.Fatalf(`expected 1 usage but got %v`, count)
 	}
-	usedPath, _ := filepath.Abs(filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`))
+	usedPath := filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`)
 	if usages[0] != usedPath {
 		t.Fatalf(`expected usage in '%v' but got '%v'`, usedPath, usages[0])
 	}
@@ -201,9 +246,12 @@ func TestMoveFiles(t *testing.T) {
 		filepath.Join(baseFolder, `Interface.yxmc`),
 	}
 	moveTo := filepath.Join(baseFolder, `macros`)
-	errs := proj.MoveFiles(files, moveTo)
-	if count := len(errs); count != 0 {
-		t.Fatalf(`expected 0 errors but got %v`, count)
+	failedMoves, err := proj.MoveFiles(files, moveTo)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	if count := len(failedMoves); count != 0 {
+		t.Fatalf(`expected 0 move errors but got %v`, count)
 	}
 	newFiles := []string{
 		filepath.Join(baseFolder, `macros`, `Calculate Filter Expression.yxmc`),
@@ -221,6 +269,35 @@ func TestMoveFiles(t *testing.T) {
 	if _, err := os.Stat(files[1]); !os.IsNotExist(err) {
 		t.Fatalf(`file '%v' still exist after the rename`, files[1])
 	}
+}
+
+func TestMoveWorkflowWithRelativeMacros(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	defer r.RebuildTestdocs(baseFolder)
+
+	proj, _ := ryxproject.Open(baseFolder)
+	proj.MakeAllFilesRelative()
+	files := []string{
+		filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`),
+	}
+	moveTo := filepath.Join(baseFolder, `macros`)
+	failedMoves, err := proj.MoveFiles(files, moveTo)
+	if err != nil || len(failedMoves) > 0 {
+		t.Fatalf(`errors occurred moving the workflow`)
+	}
+
+	newLocation := filepath.Join(baseFolder, `macros`, `01 SETLEAF Equations Completed.yxmd`)
+	expectedMacro := filepath.Join(baseFolder, `macros`, `Tag with Sets.yxmc`)
+	doc, err := ryxdoc.ReadFile(newLocation)
+	if err != nil {
+		t.Fatalf(`error loading moved file`)
+	}
+	node := doc.ReadMappedNodes()[18]
+	macroPath := node.ReadMacro()
+	if macroPath.FoundPath != expectedMacro {
+		t.Fatalf("could not find expected macro.\nexpected: %v\nfound: %v\nstored: %v", expectedMacro, macroPath.FoundPath, macroPath.StoredPath)
+	}
+
 }
 
 func generateAbsPath(path ...string) (string, error) {

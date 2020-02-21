@@ -64,7 +64,7 @@ func TestRenameMacroNodes(t *testing.T) {
 	macroPath, _ := generateAbsPath(`..`, `testdocs`, `macros`, `Tag with Sets.yxmc`)
 	newPath, _ := generateAbsPath(`..`, `testdocs`, `macros`, `Tag.yxmc`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
-	doc.RenameMacroNodes(macroPath, newPath, docFolder)
+	doc.RenameMacroNodes([]string{macroPath}, []string{newPath}, docFolder)
 	expectedPath := strings.Replace(newPath, string(os.PathSeparator), `\`, -1)
 	if macro := doc.ReadMappedNodes()[18].ReadMacro(); macro.StoredPath != expectedPath {
 		t.Fatalf(`expected macro path of '%v' but got '%v'`, expectedPath, macro.StoredPath)
@@ -121,7 +121,7 @@ func TestMakeSpecificMacroAbsolute(t *testing.T) {
 	docFolder, _ := generateAbsPath(`..`, `testdocs`)
 	macro, _ := generateAbsPath(`..`, `testdocs`, `Calculate Filter Expression.yxmc`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
-	changed := doc.MakeMacroAbsolute(macro, docFolder)
+	changed := doc.MakeMacrosAbsolute([]string{macro}, docFolder)
 	unchangedPath := `macros\Tag with Sets.yxmc`
 	expectedPath := strings.Replace(macro, string(os.PathSeparator), `\`, -1)
 	if macro := doc.ReadMappedNodes()[12].ReadMacro(); macro.StoredPath != expectedPath {
@@ -143,7 +143,7 @@ func TestMakeSpecificMacroRelative(t *testing.T) {
 	macro, _ := generateAbsPath(`..`, `testdocs`, `Calculate Filter Expression.yxmc`)
 	doc, _ := ryxdoc.ReadFile(yxmd)
 	doc.MakeAllMacrosAbsolute(docFolder)
-	changed := doc.MakeMacroRelative(macro, docFolder, docFolder)
+	changed := doc.MakeMacrosRelative([]string{macro}, docFolder, docFolder)
 	newPath1, _ := generateAbsPath(`..`, `testdocs`, `macros`, `Tag with Sets.yxmc`)
 	expectedPath1 := strings.Replace(newPath1, string(os.PathSeparator), `\`, -1)
 	expectedPath2 := `Calculate Filter Expression.yxmc`

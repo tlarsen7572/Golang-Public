@@ -291,12 +291,14 @@ func TestWhereUsed(t *testing.T) {
 	}
 }
 
-func TestRenameFile(t *testing.T) {
+func TestRenameFiles(t *testing.T) {
 	rebuildTestDocs()
 	defer rebuildTestDocs()
 
 	from, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `Calculate Filter Expression.yxmc`))
 	to, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `macros`, `Calculate Filter Expression.yxmc`))
+	fromFiles := []interface{}{from}
+	toFiles := []interface{}{to}
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -304,8 +306,8 @@ func TestRenameFile(t *testing.T) {
 	in <- cop.FunctionCall{
 		Out:        out,
 		Project:    workFolder,
-		Function:   `RenameFile`,
-		Parameters: params{`From`: from, `To`: to},
+		Function:   `RenameFiles`,
+		Parameters: params{`From`: fromFiles, `To`: toFiles},
 		Config:     &config.Config{},
 	}
 	response := <-out
@@ -319,56 +321,6 @@ func TestRenameFile(t *testing.T) {
 	_, err = os.Stat(to)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
-	}
-}
-
-func TestMoveFileInvalidFrom(t *testing.T) {
-	rebuildTestDocs()
-	defer rebuildTestDocs()
-
-	from, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `Calculate Filter Expression.yxmc`))
-	to, _ := filepath.Abs(filepath.Join(`..`, `testdocs`, `macros`, `Calculate Filter Expression.yxmc`))
-	in := make(chan cop.FunctionCall)
-	out := make(chan cop.FunctionResponse)
-	go cop.StartTrafficCop(in)
-
-	in <- cop.FunctionCall{
-		Out:        out,
-		Project:    workFolder,
-		Function:   `RenameFile`,
-		Parameters: params{`From`: []string{from}, `To`: to},
-		Config:     &config.Config{},
-	}
-	response := <-out
-	if response.Err == nil {
-		t.Fatalf(`expected an error but got none`)
-	}
-	if response.Err.Error() != `the From parameter was not included or was not a string` {
-		t.Fatalf(`expected error 'the From parameter was not included or was not a string' but got '%v'`, response.Err.Error())
-	}
-}
-
-func TestMoveFileMissingFrom(t *testing.T) {
-	rebuildTestDocs()
-	defer rebuildTestDocs()
-
-	in := make(chan cop.FunctionCall)
-	out := make(chan cop.FunctionResponse)
-	go cop.StartTrafficCop(in)
-
-	in <- cop.FunctionCall{
-		Out:        out,
-		Project:    workFolder,
-		Function:   `RenameFile`,
-		Parameters: params{`MoveTo`: `Something`},
-		Config:     &config.Config{},
-	}
-	response := <-out
-	if response.Err == nil {
-		t.Fatalf(`expected an error but got none`)
-	}
-	if response.Err.Error() != `the From parameter was not included or was not a string` {
-		t.Fatalf(`expected error 'the From parameter was not included or was not a string' but got '%v'`, response.Err.Error())
 	}
 }
 
@@ -424,30 +376,6 @@ func TestMoveFilesInvalidFilesParam(t *testing.T) {
 	response := <-out
 	if response.Err == nil {
 		t.Fatalf(`expected an error but got none`)
-	}
-}
-
-func TestMoveFileMissingTo(t *testing.T) {
-	rebuildTestDocs()
-	defer rebuildTestDocs()
-
-	in := make(chan cop.FunctionCall)
-	out := make(chan cop.FunctionResponse)
-	go cop.StartTrafficCop(in)
-
-	in <- cop.FunctionCall{
-		Out:        out,
-		Project:    workFolder,
-		Function:   `RenameFile`,
-		Parameters: params{`From`: `Something`},
-		Config:     &config.Config{},
-	}
-	response := <-out
-	if response.Err == nil {
-		t.Fatalf(`expected an error but got none`)
-	}
-	if response.Err.Error() != `the To parameter was not included or was not a string` {
-		t.Fatalf(`expected error 'the To parameter was not included or was not a string' but got '%v'`, response.Err.Error())
 	}
 }
 
@@ -507,11 +435,11 @@ func TestAnchorOrder(t *testing.T) {
 	}
 }
 
-func TestMakeMacroAbsolute(t *testing.T) {
+func TestMakeFilesAbsolute(t *testing.T) {
 	rebuildTestDocs()
 	defer rebuildTestDocs()
 
-	var macro, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmc`))
+	var file, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmc`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -519,8 +447,8 @@ func TestMakeMacroAbsolute(t *testing.T) {
 	in <- cop.FunctionCall{
 		Out:        out,
 		Project:    workFolder,
-		Function:   "MakeMacroAbsolute",
-		Parameters: params{"Macro": macro},
+		Function:   "MakeFilesAbsolute",
+		Parameters: params{"Files": []interface{}{file}},
 		Config:     &config.Config{},
 	}
 
@@ -534,7 +462,7 @@ func TestMakeMacroAbsolute(t *testing.T) {
 	}
 }
 
-func TestMakeMacroAbsoluteMissingMacro(t *testing.T) {
+func TestMakeFilesAbsoluteMissingMacro(t *testing.T) {
 	rebuildTestDocs()
 	defer rebuildTestDocs()
 
@@ -545,7 +473,7 @@ func TestMakeMacroAbsoluteMissingMacro(t *testing.T) {
 	in <- cop.FunctionCall{
 		Out:        out,
 		Project:    workFolder,
-		Function:   "MakeMacroAbsolute",
+		Function:   "MakeFilesAbsolute",
 		Parameters: params{},
 		Config:     &config.Config{},
 	}
@@ -557,11 +485,11 @@ func TestMakeMacroAbsoluteMissingMacro(t *testing.T) {
 	t.Logf(response.Err.Error())
 }
 
-func TestMakeMacroRelative(t *testing.T) {
+func TestMakeFilesRelative(t *testing.T) {
 	rebuildTestDocs()
 	defer rebuildTestDocs()
 
-	var macro, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmc`))
+	var file, _ = filepath.Abs(filepath.Join(`..`, `testdocs`, `MultiInOut.yxmc`))
 	in := make(chan cop.FunctionCall)
 	out := make(chan cop.FunctionResponse)
 	go cop.StartTrafficCop(in)
@@ -569,8 +497,8 @@ func TestMakeMacroRelative(t *testing.T) {
 	in <- cop.FunctionCall{
 		Out:        out,
 		Project:    workFolder,
-		Function:   "MakeMacroRelative",
-		Parameters: params{"Macro": macro},
+		Function:   "MakeFilesRelative",
+		Parameters: params{"Files": []interface{}{file}},
 		Config:     &config.Config{},
 	}
 
@@ -584,7 +512,7 @@ func TestMakeMacroRelative(t *testing.T) {
 	}
 }
 
-func TestMakeMacroRelativeMissingMacro(t *testing.T) {
+func TestMakeFilesRelativeMissingFiles(t *testing.T) {
 	rebuildTestDocs()
 	defer rebuildTestDocs()
 
@@ -595,7 +523,7 @@ func TestMakeMacroRelativeMissingMacro(t *testing.T) {
 	in <- cop.FunctionCall{
 		Out:        out,
 		Project:    workFolder,
-		Function:   "MakeMacroRelative",
+		Function:   "MakeFilesRelative",
 		Parameters: params{},
 		Config:     &config.Config{},
 	}
@@ -607,7 +535,7 @@ func TestMakeMacroRelativeMissingMacro(t *testing.T) {
 	t.Logf(response.Err.Error())
 }
 
-func TestMakeAllMacrosRelative(t *testing.T) {
+func TestMakeAllFilesRelative(t *testing.T) {
 	rebuildTestDocs()
 	defer rebuildTestDocs()
 
@@ -618,7 +546,7 @@ func TestMakeAllMacrosRelative(t *testing.T) {
 	in <- cop.FunctionCall{
 		Out:        out,
 		Project:    workFolder,
-		Function:   "MakeAllMacrosRelative",
+		Function:   "MakeAllFilesRelative",
 		Parameters: params{},
 		Config:     &config.Config{},
 	}
@@ -632,7 +560,7 @@ func TestMakeAllMacrosRelative(t *testing.T) {
 	}
 }
 
-func TestMakeAllMacrosAbsolute(t *testing.T) {
+func TestMakeAllFilesAbsolute(t *testing.T) {
 	rebuildTestDocs()
 	defer rebuildTestDocs()
 
@@ -643,7 +571,7 @@ func TestMakeAllMacrosAbsolute(t *testing.T) {
 	in <- cop.FunctionCall{
 		Out:        out,
 		Project:    workFolder,
-		Function:   "MakeAllMacrosAbsolute",
+		Function:   "MakeAllFilesAbsolute",
 		Parameters: params{},
 		Config:     &config.Config{},
 	}

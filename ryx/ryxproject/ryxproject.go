@@ -46,39 +46,21 @@ func (ryxProject *RyxProject) ReadPath() string {
 	return ryxProject.path
 }
 
-func (ryxProject *RyxProject) RenameFile(oldPath string, newPath string) error {
-	docs, err := ryxProject.Docs()
-	if err != nil {
-		return err
-	}
-	for path, doc := range docs {
-		if path == newPath {
-			continue
-		}
-		folder := filepath.Dir(path)
-		macroPaths := ryxProject.generateMacroPaths(folder)
-		renamed := doc.RenameMacroNodes(oldPath, newPath, macroPaths...)
-		if renamed > 0 {
-			_ = doc.Save(path)
-		}
-	}
-	return os.Rename(oldPath, newPath)
+func (ryxProject *RyxProject) RenameFiles(fromFiles []string, toFiles []string) ([]string, error) {
+	return ryxProject._renameFiles(fromFiles, toFiles)
 }
 
-func (ryxProject *RyxProject) MoveFiles(files []string, moveTo string) (errFiles []string) {
-	errFiles = []string{}
+func (ryxProject *RyxProject) MoveFiles(files []string, moveTo string) ([]string, error) {
+	newFiles := []string{}
 	for _, file := range files {
 		_, name := filepath.Split(file)
 		newPath := filepath.Join(moveTo, name)
-		err := ryxProject.RenameFile(file, newPath)
-		if err != nil {
-			errFiles = append(errFiles, file)
-		}
+		newFiles = append(newFiles, newPath)
 	}
-	return errFiles
+	return ryxProject._renameFiles(files, newFiles)
 }
 
-func (ryxProject *RyxProject) MakeAllMacrosAbsolute() int {
+func (ryxProject *RyxProject) MakeAllFilesAbsolute() int {
 	docs, err := ryxProject.Docs()
 	if err != nil {
 		return 0
@@ -96,7 +78,7 @@ func (ryxProject *RyxProject) MakeAllMacrosAbsolute() int {
 	return docsChanged
 }
 
-func (ryxProject *RyxProject) MakeMacroAbsolute(macroAbsPath string) int {
+func (ryxProject *RyxProject) MakeFilesAbsolute(macroAbsPath []string) int {
 	docs, err := ryxProject.Docs()
 	if err != nil {
 		return 0
@@ -105,7 +87,12 @@ func (ryxProject *RyxProject) MakeMacroAbsolute(macroAbsPath string) int {
 	for path, doc := range docs {
 		folder := filepath.Dir(path)
 		macroPaths := ryxProject.generateMacroPaths(folder)
-		changed := doc.MakeMacroAbsolute(macroAbsPath, macroPaths...)
+		var changed int
+		if StringsContain(macroAbsPath, path) {
+			changed = doc.MakeAllMacrosAbsolute(macroPaths...)
+		} else {
+			changed = doc.MakeMacrosAbsolute(macroAbsPath, macroPaths...)
+		}
 		if changed > 0 {
 			docsChanged++
 			_ = doc.Save(path)
@@ -114,7 +101,7 @@ func (ryxProject *RyxProject) MakeMacroAbsolute(macroAbsPath string) int {
 	return docsChanged
 }
 
-func (ryxProject *RyxProject) MakeAllMacrosRelative() int {
+func (ryxProject *RyxProject) MakeAllFilesRelative() int {
 	docs, err := ryxProject.Docs()
 	if err != nil {
 		return 0
@@ -132,7 +119,7 @@ func (ryxProject *RyxProject) MakeAllMacrosRelative() int {
 	return docsChanged
 }
 
-func (ryxProject *RyxProject) MakeMacroRelative(macroAbsPath string) int {
+func (ryxProject *RyxProject) MakeFilesRelative(macroAbsPath []string) int {
 	docs, err := ryxProject.Docs()
 	if err != nil {
 		return 0
@@ -141,7 +128,12 @@ func (ryxProject *RyxProject) MakeMacroRelative(macroAbsPath string) int {
 	for path, doc := range docs {
 		folder := filepath.Dir(path)
 		macroPaths := ryxProject.generateMacroPaths(folder)
-		changed := doc.MakeMacroRelative(macroAbsPath, folder, macroPaths...)
+		var changed int
+		if StringsContain(macroAbsPath, path) {
+			changed = doc.MakeAllMacrosRelative(folder, macroPaths...)
+		} else {
+			changed = doc.MakeMacrosRelative(macroAbsPath, folder, macroPaths...)
+		}
 		if changed > 0 {
 			docsChanged++
 			_ = doc.Save(path)
@@ -198,4 +190,59 @@ func docsFromStructure(structure *ryxfolder.RyxFolder) map[string]*ryxdoc.RyxDoc
 
 func (ryxProject *RyxProject) generateMacroPaths(additionalPaths ...string) []string {
 	return append(additionalPaths, ryxProject.macroPaths...)
+}
+
+func (ryxProject *RyxProject) _renameFiles(oldPaths []string, newPaths []string) ([]string, error) {
+	if len(oldPaths) != len(newPaths) {
+		return nil, errors.New(`the lists of From and To files were not the same length`)
+	}
+
+	docs, err := ryxProject.Docs()
+	if err != nil {
+		return nil, err
+	}
+
+	oldPathsFailed := []string{}
+	oldPathsSuccess := []string{}
+	newPathsSuccess := []string{}
+	for index := range oldPaths {
+		oldPath := oldPaths[index]
+		newPath := newPaths[index]
+		doc, ok := docs[oldPath]
+		if ok {
+			macroPaths := ryxProject.generateMacroPaths(filepath.Dir(oldPath))
+			doc.MakeAllMacrosAbsolute(macroPaths...)
+		}
+		renameErr := doc.Save(newPath)
+		if renameErr != nil {
+			oldPathsFailed = append(oldPathsFailed, oldPath)
+			continue
+		}
+		oldPathsSuccess = append(oldPathsSuccess, oldPath)
+		newPathsSuccess = append(newPathsSuccess, newPath)
+	}
+
+	for path, doc := range docs {
+		folder := filepath.Dir(path)
+		macroPaths := ryxProject.generateMacroPaths(folder)
+		renamed := doc.RenameMacroNodes(oldPathsSuccess, newPathsSuccess, macroPaths...)
+		if renamed > 0 {
+			_ = doc.Save(path)
+		}
+	}
+
+	for _, path := range oldPathsSuccess {
+		_ = os.Remove(path)
+	}
+
+	return oldPathsFailed, nil
+}
+
+func StringsContain(strings []string, value string) bool {
+	for _, item := range strings {
+		if item == value {
+			return true
+		}
+	}
+	return false
 }

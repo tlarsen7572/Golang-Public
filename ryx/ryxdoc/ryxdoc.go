@@ -112,16 +112,12 @@ func (ryxDoc *RyxDoc) AddConnection(connection *RyxConn) {
 	ryxDoc.Connections = append(ryxDoc.Connections, connection)
 }
 
-func (ryxDoc *RyxDoc) RenameMacroNodes(macroAbsPath string, newPath string, macroPaths ...string) int {
-	renamedNodes := 0
-	for _, node := range ryxDoc.Nodes {
-		macro := node.ReadMacro(macroPaths...)
-		if macro.FoundPath == macroAbsPath {
-			node.SetMacro(newPath)
-			renamedNodes++
-		}
+func (ryxDoc *RyxDoc) RenameMacroNodes(macroAbsPaths []string, newPaths []string, macroPaths ...string) int {
+	changer := func(node *ryxnode.RyxNode, macroAbsPathIndex int) error {
+		node.SetMacro(newPaths[macroAbsPathIndex])
+		return nil
 	}
-	return renamedNodes
+	return ryxDoc._changeMacrosIfMatches(macroAbsPaths, changer, macroPaths...)
 }
 
 func (ryxDoc *RyxDoc) MakeAllMacrosAbsolute(macroPaths ...string) int {
@@ -135,18 +131,11 @@ func (ryxDoc *RyxDoc) MakeAllMacrosAbsolute(macroPaths ...string) int {
 	return changed
 }
 
-func (ryxDoc *RyxDoc) MakeMacroAbsolute(macroAbsPath string, macroPaths ...string) int {
-	changed := 0
-	for _, node := range ryxDoc.Nodes {
-		macro := node.ReadMacro(macroPaths...)
-		if macro.FoundPath == macroAbsPath {
-			err := node.MakeMacroAbsolute(macroPaths...)
-			if err == nil {
-				changed++
-			}
-		}
+func (ryxDoc *RyxDoc) MakeMacrosAbsolute(macroAbsPaths []string, macroPaths ...string) int {
+	changer := func(node *ryxnode.RyxNode, macroAbsPathIndex int) error {
+		return node.MakeMacroAbsolute(macroPaths...)
 	}
-	return changed
+	return ryxDoc._changeMacrosIfMatches(macroAbsPaths, changer, macroPaths...)
 }
 
 func (ryxDoc *RyxDoc) MakeAllMacrosRelative(relativeTo string, macroPaths ...string) int {
@@ -160,18 +149,11 @@ func (ryxDoc *RyxDoc) MakeAllMacrosRelative(relativeTo string, macroPaths ...str
 	return changed
 }
 
-func (ryxDoc *RyxDoc) MakeMacroRelative(macroAbsPath string, relativeTo string, macroPaths ...string) int {
-	changed := 0
-	for _, node := range ryxDoc.Nodes {
-		macro := node.ReadMacro(macroPaths...)
-		if macro.FoundPath == macroAbsPath {
-			err := node.MakeMacroRelative(relativeTo, macroPaths...)
-			if err == nil {
-				changed++
-			}
-		}
+func (ryxDoc *RyxDoc) MakeMacrosRelative(macroAbsPaths []string, relativeTo string, macroPaths ...string) int {
+	changer := func(node *ryxnode.RyxNode, macroAbsPathIndex int) error {
+		return node.MakeMacroRelative(relativeTo, macroPaths...)
 	}
-	return changed
+	return ryxDoc._changeMacrosIfMatches(macroAbsPaths, changer, macroPaths...)
 }
 
 func (ryxDoc *RyxDoc) Save(path string) error {
@@ -194,4 +176,21 @@ func (ryxDoc *RyxDoc) grabNextIdAndIncrement() int {
 	id := 0
 	id, ryxDoc.nextId = ryxDoc.nextId, ryxDoc.nextId+1
 	return id
+}
+
+func (ryxDoc *RyxDoc) _changeMacrosIfMatches(macroAbsPaths []string, changer func(node *ryxnode.RyxNode, macroAbsPathIndex int) error, macroPaths ...string) int {
+	changed := 0
+	for _, node := range ryxDoc.Nodes {
+		macro := node.ReadMacro(macroPaths...)
+		for macroAbsPathIndex, macroAbsPath := range macroAbsPaths {
+			if macro.FoundPath == macroAbsPath {
+				err := changer(node, macroAbsPathIndex)
+				if err == nil {
+					changed++
+				}
+				break
+			}
+		}
+	}
+	return changed
 }
