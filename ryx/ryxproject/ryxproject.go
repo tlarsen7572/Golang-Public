@@ -197,22 +197,21 @@ func (ryxProject *RyxProject) _renameFiles(oldPaths []string, newPaths []string)
 		return nil, errors.New(`the lists of From and To files were not the same length`)
 	}
 
-	docs, err := ryxProject.Docs()
-	if err != nil {
-		return nil, err
-	}
-
 	oldPathsFailed := []string{}
 	oldPathsSuccess := []string{}
 	newPathsSuccess := []string{}
+
+	//Save old files to new location
 	for index := range oldPaths {
 		oldPath := oldPaths[index]
 		newPath := newPaths[index]
-		doc, ok := docs[oldPath]
-		if ok {
-			macroPaths := ryxProject.generateMacroPaths(filepath.Dir(oldPath))
-			doc.MakeAllMacrosAbsolute(macroPaths...)
+		doc, err := ryxdoc.ReadFile(oldPath)
+		if err != nil {
+			oldPathsFailed = append(oldPathsFailed, oldPath)
+			continue
 		}
+		macroPaths := ryxProject.generateMacroPaths(filepath.Dir(oldPath))
+		doc.MakeAllMacrosAbsolute(macroPaths...)
 		renameErr := doc.Save(newPath)
 		if renameErr != nil {
 			oldPathsFailed = append(oldPathsFailed, oldPath)
@@ -222,6 +221,16 @@ func (ryxProject *RyxProject) _renameFiles(oldPaths []string, newPaths []string)
 		newPathsSuccess = append(newPathsSuccess, newPath)
 	}
 
+	//Get docs in the project
+	docs, err := ryxProject.Docs()
+	if err != nil {
+		for _, path := range newPathsSuccess {
+			_ = os.Remove(path)
+		}
+		return nil, err
+	}
+
+	//Fix macro paths
 	for path, doc := range docs {
 		folder := filepath.Dir(path)
 		macroPaths := ryxProject.generateMacroPaths(folder)
@@ -231,6 +240,7 @@ func (ryxProject *RyxProject) _renameFiles(oldPaths []string, newPaths []string)
 		}
 	}
 
+	//Delete old files
 	for _, path := range oldPathsSuccess {
 		_ = os.Remove(path)
 	}

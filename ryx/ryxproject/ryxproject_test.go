@@ -243,7 +243,7 @@ func TestMoveFiles(t *testing.T) {
 	proj, _ := ryxproject.Open(baseFolder)
 	files := []string{
 		filepath.Join(baseFolder, `Calculate Filter Expression.yxmc`),
-		filepath.Join(baseFolder, `Interface.yxmc`),
+		filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`),
 	}
 	moveTo := filepath.Join(baseFolder, `macros`)
 	failedMoves, err := proj.MoveFiles(files, moveTo)
@@ -255,7 +255,7 @@ func TestMoveFiles(t *testing.T) {
 	}
 	newFiles := []string{
 		filepath.Join(baseFolder, `macros`, `Calculate Filter Expression.yxmc`),
-		filepath.Join(baseFolder, `macros`, `Interface.yxmc`),
+		filepath.Join(baseFolder, `macros`, `01 SETLEAF Equations Completed.yxmd`),
 	}
 	if _, err := os.Stat(newFiles[0]); os.IsNotExist(err) {
 		t.Fatalf(`file '%v' did not exist after the rename`, newFiles[0])
@@ -268,6 +268,12 @@ func TestMoveFiles(t *testing.T) {
 	}
 	if _, err := os.Stat(files[1]); !os.IsNotExist(err) {
 		t.Fatalf(`file '%v' still exist after the rename`, files[1])
+	}
+	doc, _ := ryxdoc.ReadFile(newFiles[1])
+	macroNode := doc.ReadMappedNodes()[12]
+	macro := macroNode.ReadMacro(filepath.Dir(newFiles[1]))
+	if macro.FoundPath != newFiles[0] {
+		t.Fatalf(`expected tool 12 to be a macro at '%v', but got '%v': stored path was '%v'`, newFiles[1], macro.FoundPath, macro.StoredPath)
 	}
 }
 
