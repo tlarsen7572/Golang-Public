@@ -142,6 +142,13 @@ func (ryxProject *RyxProject) MakeFilesRelative(macroAbsPath []string) int {
 	return docsChanged
 }
 
+func (ryxProject *RyxProject) RenameFolder(from string, to string) error {
+	parent := filepath.Dir(from)
+	toPath := filepath.Join(parent, to)
+	err := os.Rename(from, toPath)
+	return err
+}
+
 func (ryxProject *RyxProject) RetrieveDocument(path string) (*ryxdoc.RyxDoc, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {

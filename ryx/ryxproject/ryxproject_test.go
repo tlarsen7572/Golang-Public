@@ -303,7 +303,26 @@ func TestMoveWorkflowWithRelativeMacros(t *testing.T) {
 	if macroPath.FoundPath != expectedMacro {
 		t.Fatalf("could not find expected macro.\nexpected: %v\nfound: %v\nstored: %v", expectedMacro, macroPath.FoundPath, macroPath.StoredPath)
 	}
+}
 
+func TestRenameFolder(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	defer r.RebuildTestdocs(baseFolder)
+
+	from := filepath.Join(baseFolder, `macros`)
+	to := `stuff`
+	proj, _ := ryxproject.Open(baseFolder)
+	err := proj.RenameFolder(from, to)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	toPath := filepath.Join(baseFolder, to)
+	if _, err = os.Stat(from); os.IsExist(err) {
+		t.Fatalf(`expected the from folder to no longer exist, but it does`)
+	}
+	if _, err = os.Stat(toPath); os.IsNotExist(err) {
+		t.Fatalf(`expected the to folder to exist, but it does not`)
+	}
 }
 
 func generateAbsPath(path ...string) (string, error) {
