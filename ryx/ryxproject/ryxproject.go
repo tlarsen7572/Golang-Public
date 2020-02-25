@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/tlarsen7572/Golang-Public/ryx/ryxdoc"
 	"github.com/tlarsen7572/Golang-Public/ryx/ryxfolder"
+	"github.com/tlarsen7572/Golang-Public/ryx/ryxnode"
 	"os"
 	"path/filepath"
 	"strings"
@@ -206,15 +207,20 @@ func (ryxProject *RyxProject) _renameFiles(oldPaths []string, newPaths []string)
 
 	oldPathsFailed := []string{}
 	oldPathsSuccess := []string{}
-	newPathsSuccess := []string{}
+
+	changeOrganizer, err := ryxProject._collectAffectedNodes(oldPaths, newPaths)
+	if err != nil {
+		return nil, err
+	}
 
 	//Save old files to new location
 	for index := range oldPaths {
 		oldPath := oldPaths[index]
 		newPath := newPaths[index]
-		doc, err := ryxdoc.ReadFile(oldPath)
-		if err != nil {
+		doc, ok := changeOrganizer.allDocs[oldPath]
+		if !ok {
 			oldPathsFailed = append(oldPathsFailed, oldPath)
+			delete(changeOrganizer.trackers, oldPath)
 			continue
 		}
 		macroPaths := ryxProject.generateMacroPaths(filepath.Dir(oldPath))
@@ -222,29 +228,26 @@ func (ryxProject *RyxProject) _renameFiles(oldPaths []string, newPaths []string)
 		renameErr := doc.Save(newPath)
 		if renameErr != nil {
 			oldPathsFailed = append(oldPathsFailed, oldPath)
+			delete(changeOrganizer.trackers, oldPath)
 			continue
 		}
+		if _, ok := changeOrganizer.affectedDocs[oldPath]; ok {
+			changeOrganizer.affectedDocs[newPath] = doc
+		}
+		changeOrganizer.allDocs[newPath] = doc
+		delete(changeOrganizer.affectedDocs, oldPath)
+		delete(changeOrganizer.allDocs, oldPath)
 		oldPathsSuccess = append(oldPathsSuccess, oldPath)
-		newPathsSuccess = append(newPathsSuccess, newPath)
 	}
 
-	//Get docs in the project
-	docs, err := ryxProject.Docs()
-	if err != nil {
-		for _, path := range newPathsSuccess {
-			_ = os.Remove(path)
+	//Redirect paths where the renamed files are used
+	for _, tracker := range changeOrganizer.trackers {
+		for _, node := range tracker.nodes {
+			node.SetMacro(tracker.newPath)
 		}
-		return nil, err
 	}
-
-	//Fix macro paths
-	for path, doc := range docs {
-		folder := filepath.Dir(path)
-		macroPaths := ryxProject.generateMacroPaths(folder)
-		renamed := doc.RenameMacroNodes(oldPathsSuccess, newPathsSuccess, macroPaths...)
-		if renamed > 0 {
-			_ = doc.Save(path)
-		}
+	for path, doc := range changeOrganizer.affectedDocs {
+		_ = doc.Save(path)
 	}
 
 	//Delete old files
@@ -253,6 +256,59 @@ func (ryxProject *RyxProject) _renameFiles(oldPaths []string, newPaths []string)
 	}
 
 	return oldPathsFailed, nil
+}
+
+type RenameOrganizer struct {
+	trackers     map[string]*RenameTracker
+	affectedDocs map[string]*ryxdoc.RyxDoc
+	allDocs      map[string]*ryxdoc.RyxDoc
+}
+
+type RenameTracker struct {
+	path    string
+	newPath string
+	nodes   []*ryxnode.RyxNode
+}
+
+func (ryxProject *RyxProject) _collectAffectedNodes(oldPaths []string, newPaths []string) (*RenameOrganizer, error) {
+	docs, err := ryxProject.Docs()
+	if err != nil {
+		return nil, err
+	}
+	organizer := &RenameOrganizer{
+		trackers:     make(map[string]*RenameTracker, len(oldPaths)),
+		affectedDocs: make(map[string]*ryxdoc.RyxDoc),
+		allDocs:      docs,
+	}
+	for index := range oldPaths {
+		organizer.trackers[oldPaths[index]] = &RenameTracker{
+			path:    oldPaths[index],
+			newPath: newPaths[index],
+			nodes:   nil,
+		}
+	}
+	for path, doc := range docs {
+		folder := filepath.Dir(path)
+		affectedMacros := 0
+		for _, node := range doc.Nodes {
+			if node.ReadCategory() != ryxnode.Macro {
+				continue
+			}
+			macroPaths := append(ryxProject.macroPaths, folder)
+			macro := node.ReadMacro(macroPaths...)
+			for _, oldPath := range oldPaths {
+				if macro.FoundPath == oldPath {
+					organizer.trackers[oldPath].nodes = append(organizer.trackers[oldPath].nodes, node)
+					affectedMacros++
+					continue
+				}
+			}
+		}
+		if affectedMacros > 0 {
+			organizer.affectedDocs[path] = doc
+		}
+	}
+	return organizer, nil
 }
 
 func StringsContain(strings []string, value string) bool {

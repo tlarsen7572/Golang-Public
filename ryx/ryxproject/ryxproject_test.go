@@ -273,7 +273,7 @@ func TestMoveFiles(t *testing.T) {
 	macroNode := doc.ReadMappedNodes()[12]
 	macro := macroNode.ReadMacro(filepath.Dir(newFiles[1]))
 	if macro.FoundPath != newFiles[0] {
-		t.Fatalf(`expected tool 12 to be a macro at '%v', but got '%v': stored path was '%v'`, newFiles[1], macro.FoundPath, macro.StoredPath)
+		t.Fatalf(`expected tool 12 to be a macro at '%v', but got '%v': stored path was '%v'`, newFiles[0], macro.FoundPath, macro.StoredPath)
 	}
 }
 
