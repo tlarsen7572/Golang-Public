@@ -615,6 +615,75 @@ func TestInterfaceNodesDocumentStructure(t *testing.T) {
 	t.Logf(string(encoded))
 }
 
+func TestRenameFolder(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	from := filepath.Join(workFolder, `macros`)
+	to := `stuff`
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "RenameFolder",
+		Parameters: params{`From`: from, `To`: to},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err != nil {
+		t.Fatalf(`expected no error but got: %v`, response.Err.Error())
+	}
+}
+
+func TestRenameFolderWithoutFrom(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	to := `stuff`
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "RenameFolder",
+		Parameters: params{`To`: to},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err == nil {
+		t.Fatalf(`expected an error but got none`)
+	}
+	t.Logf(response.Err.Error())
+}
+
+func TestRenameFolderWithoutTo(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	from := filepath.Join(workFolder, `macros`)
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "RenameFolder",
+		Parameters: params{`From`: from},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err == nil {
+		t.Fatalf(`expected an error but got none`)
+	}
+	t.Logf(response.Err.Error())
+}
+
 func rebuildTestDocs() {
 	testdocbuilder.RebuildTestdocs(filepath.Join(`..`, `testdocs`))
 }

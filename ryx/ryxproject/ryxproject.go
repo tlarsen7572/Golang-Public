@@ -146,8 +146,44 @@ func (ryxProject *RyxProject) MakeFilesRelative(macroAbsPath []string) int {
 func (ryxProject *RyxProject) RenameFolder(from string, to string) error {
 	parent := filepath.Dir(from)
 	toPath := filepath.Join(parent, to)
-	err := os.Rename(from, toPath)
-	return err
+	oldPaths := make([]string, 0)
+	newPaths := make([]string, 0)
+	folder, err := ryxfolder.Build(from)
+	if err != nil {
+		return err
+	}
+	for _, file := range folder.AllFiles() {
+		trimmed := strings.TrimPrefix(file, from)
+		newPath := filepath.Join(toPath, trimmed)
+		oldPaths = append(oldPaths, file)
+		newPaths = append(newPaths, newPath)
+	}
+	organizer, err := ryxProject._collectAffectedNodes(oldPaths, newPaths)
+	if err != nil {
+		return err
+	}
+
+	err = os.Rename(from, toPath)
+	if err != nil {
+		return err
+	}
+
+	for _, tracker := range organizer.trackers {
+		for _, node := range tracker.nodes {
+			node.SetMacro(tracker.newPath)
+		}
+	}
+	for index, oldPath := range oldPaths {
+		if doc, ok := organizer.affectedDocs[oldPath]; ok {
+			organizer.affectedDocs[newPaths[index]] = doc
+			delete(organizer.affectedDocs, oldPath)
+		}
+	}
+
+	for path, doc := range organizer.affectedDocs {
+		_ = doc.Save(path)
+	}
+	return nil
 }
 
 func (ryxProject *RyxProject) RetrieveDocument(path string) (*ryxdoc.RyxDoc, error) {

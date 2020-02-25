@@ -323,6 +323,18 @@ func TestRenameFolder(t *testing.T) {
 	if _, err = os.Stat(toPath); os.IsNotExist(err) {
 		t.Fatalf(`expected the to folder to exist, but it does not`)
 	}
+
+	workflow := filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`)
+	expectedMacro := filepath.Join(baseFolder, `stuff`, `Tag with Sets.yxmc`)
+	doc, err := ryxdoc.ReadFile(workflow)
+	if err != nil {
+		t.Fatalf(`error loading workflow`)
+	}
+	node := doc.ReadMappedNodes()[18]
+	macroPath := node.ReadMacro()
+	if macroPath.FoundPath != expectedMacro {
+		t.Fatalf("could not find expected macro.\nexpected: %v\nfound: %v\nstored: %v", expectedMacro, macroPath.FoundPath, macroPath.StoredPath)
+	}
 }
 
 func generateAbsPath(path ...string) (string, error) {
