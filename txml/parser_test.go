@@ -12,6 +12,50 @@ const humanReadable = `<Root>
   <Node id="1"></Node>
   <Node id="2"></Node>
 </Root>`
+const cdataXml = `<Root><![CDATA[ ... ]]></Root>`
+const multiLineTextChildXml = "<Root>See Spot...\r\nSee Spot Run...\r\nRun Spot, run...\r\n</Root>"
+
+func TestParseMultiLineTextChildXml(t *testing.T) {
+	parsed, err := txml.Parse(multiLineTextChildXml)
+
+	if err != nil {
+		t.Fatalf(`expected no error but got '%v'`, err.Error())
+	}
+	if parsed == nil {
+		t.Fatalf(`expected non-nil parsed but got nil`)
+	}
+	if count := len(parsed.Attributes); count > 0 {
+		t.Fatalf(`expected 0 attributes but got %v`, count)
+	}
+	if count := len(parsed.Nodes); count > 0 {
+		t.Fatalf(`expected 0 nodes but got %v`, count)
+	}
+	expected := "See Spot...\r\nSee Spot Run...\r\nRun Spot, run...\r\n"
+	if parsed.InnerText != expected {
+		t.Fatalf(`expected InnerText of '%v' but got '%v'`, expected, parsed.InnerText)
+	}
+	t.Logf(parsed.InnerText)
+}
+
+func TestParseCdataXml(t *testing.T) {
+	parsed, err := txml.Parse(cdataXml)
+
+	if err != nil {
+		t.Fatalf(`expected no error but got '%v'`, err.Error())
+	}
+	if parsed == nil {
+		t.Fatalf(`expected non-nil parsed but got nil`)
+	}
+	if count := len(parsed.Attributes); count > 0 {
+		t.Fatalf(`expected 0 attributes but got %v`, count)
+	}
+	if count := len(parsed.Nodes); count > 0 {
+		t.Fatalf(`expected 0 nodes but got %v`, count)
+	}
+	if parsed.InnerText != `<![CDATA[ ... ]]>` {
+		t.Fatalf(`expected InnerText of '<![CDATA[ ... ]]>' but got '%v'`, parsed.InnerText)
+	}
+}
 
 func TestParseSingleChildXml(t *testing.T) {
 	parsed, err := txml.Parse(singleChildXml)
@@ -216,7 +260,7 @@ func TestInnerTextLeadingSpaceToXml(t *testing.T) {
 	if err != nil {
 		t.Fatalf(`expected no error but got '%v'`, err.Error())
 	}
-	expectedXml := `<Element id="1" type="Something"><Sub><![CDATA[ My Text with leading space]]></Sub></Element>`
+	expectedXml := `<Element id="1" type="Something"><Sub> My Text with leading space</Sub></Element>`
 	if xml != expectedXml {
 		t.Fatalf(`expected xml '%v' but got '%v'`, expectedXml, xml)
 	}

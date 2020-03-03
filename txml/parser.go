@@ -18,14 +18,7 @@ func Parse(xmlString string) (*Node, error) {
 type Node struct {
 	Name       string            `xml:"-"`
 	Attributes map[string]string `xml:"-"`
-	InnerText  string            `xml:",chardata"`
-	Nodes      []*Node           `xml:",any"`
-}
-
-type _NodeCData struct {
-	Name       string            `xml:"-"`
-	Attributes map[string]string `xml:"-"`
-	InnerText  string            `xml:",cdata"`
+	InnerText  string            `xml:",innerxml"`
 	Nodes      []*Node           `xml:",any"`
 }
 
@@ -124,19 +117,7 @@ func (node *Node) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: key}, Value: value})
 	}
 	start.Name = xml.Name{Local: node.Name}
-
-	if match, err := regexp.MatchString(`^\s+`, node.InnerText); err == nil && match {
-		nodePointer := &_NodeCData{
-			Name:       node.Name,
-			Attributes: node.Attributes,
-			InnerText:  node.InnerText,
-			Nodes:      node.Nodes,
-		}
-		return e.EncodeElement(nodePointer, start)
-	}
-
 	type nodePointer Node
-
 	return e.EncodeElement((*nodePointer)(node), start)
 }
 

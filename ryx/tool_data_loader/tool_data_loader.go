@@ -14,7 +14,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"strings"
+	"regexp"
 )
 
 type DllToolData struct {
@@ -219,7 +219,8 @@ func ReadSingleMacro(path string, macroPath string) (ToolData, error) {
 		plugin = path
 	}
 	icon := macroXml.First(`Properties`).First(`RuntimeProperties`).First(`MacroImage`).InnerText
-	icon = strings.Replace(icon, "\n", ``, -1)
+	var replacer = regexp.MustCompile(`[\r\n]`)
+	icon = replacer.ReplaceAllString(icon, ``)
 	inputs := make([]string, 0)
 	outputs := make([]string, 0)
 	for _, node := range macro.Nodes {
