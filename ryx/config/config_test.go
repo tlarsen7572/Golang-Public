@@ -22,8 +22,8 @@ func TestLoadConfig(t *testing.T) {
 	if config.UserFolders[0] != `C:\Users\tlarsen` {
 		t.Fatalf(`expected user folder 'tlarsen' but got '%v'`, config.UserFolders[0])
 	}
-	if config.HttpPort != `35012` {
-		t.Fatalf(`expected HTTP port '35012' but got '%v'`, config.HttpPort)
+	if config.Address != `localhost:35012` {
+		t.Fatalf(`expected address 'localhost:35012' but got '%v'`, config.Address)
 	}
 	if count := len(config.BrowseFolderRoots); count != 2 {
 		t.Fatalf(`expected 2 browse folder roots but got %v`, count)

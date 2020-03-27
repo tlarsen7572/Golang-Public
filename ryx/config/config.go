@@ -25,7 +25,7 @@ type Config struct {
 	InstallPath       string
 	ProgramDataPath   string
 	UserFolders       []string
-	HttpPort          string
+	Address           string
 	BrowseFolderRoots []string
 	LogPath           string
 	ToolData          []tool_data_loader.ToolData

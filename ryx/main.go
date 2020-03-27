@@ -45,8 +45,8 @@ func main() {
 	http.HandleFunc("/assets/AssetManifest.json", handleFile)
 	http.HandleFunc("/assets/fonts/MaterialIcons-Regular.ttf", handleFile)
 	http.HandleFunc("/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf", handleFile)
-	println(`listening on port ` + conf.HttpPort)
-	err = http.ListenAndServe(fmt.Sprintf(`:%v`, conf.HttpPort), nil)
+	println(`listening on ` + conf.Address)
+	err = http.ListenAndServe(conf.Address, nil)
 	if err != nil {
 		writeLog(log, err.Error())
 	}

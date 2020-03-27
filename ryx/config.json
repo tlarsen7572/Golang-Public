@@ -4,7 +4,7 @@
   "UserFolders": [
     "C:\\Users\\someUserName"
   ],
-  "HttpPort": "35012",
+  "Address": "localhost:35012",
   "BrowseFolderRoots": [
     "C:\\",
     "D:\\"
