@@ -9,7 +9,6 @@ import (
 	cop "github.com/tlarsen7572/Golang-Public/ryx/traffic_cop"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"time"
 )
@@ -41,10 +40,7 @@ func main() {
 	http.HandleFunc(`/`, generateServe(in, conf))
 	http.HandleFunc("/main.dart.js", handleFile)
 	http.HandleFunc("/main.dart.js.map", handleFile)
-	http.HandleFunc("/assets/FontManifest.json", handleFile)
-	http.HandleFunc("/assets/AssetManifest.json", handleFile)
-	http.HandleFunc("/assets/fonts/MaterialIcons-Regular.ttf", handleFile)
-	http.HandleFunc("/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf", handleFile)
+	http.HandleFunc("/assets/", handleFile)
 	println(`listening on ` + conf.Address)
 	err = http.ListenAndServe(conf.Address, nil)
 	if err != nil {
@@ -100,7 +96,7 @@ func generateServe(in chan cop.FunctionCall, conf *config.Config) func(writer ht
 }
 
 func handleFile(w http.ResponseWriter, r *http.Request) {
-	_, file := path.Split(r.URL.Path)
+	file := r.URL.Path
 	ext := filepath.Ext(file)
 	if ext == `.js` || ext == `.json` || ext == `.map` {
 		setHeaders(w, "application/javascript")
