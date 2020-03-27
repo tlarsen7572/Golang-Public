@@ -40,6 +40,7 @@ func main() {
 	http.HandleFunc(`/`, generateServe(in, conf))
 	http.HandleFunc("/main.dart.js", handleFile)
 	http.HandleFunc("/main.dart.js.map", handleFile)
+	http.HandleFunc("/main.dart.js.deps", handleFile)
 	http.HandleFunc("/assets/", handleFile)
 	println(`listening on ` + conf.Address)
 	err = http.ListenAndServe(conf.Address, nil)
@@ -100,6 +101,9 @@ func handleFile(w http.ResponseWriter, r *http.Request) {
 	ext := filepath.Ext(file)
 	if ext == `.js` || ext == `.json` || ext == `.map` {
 		setHeaders(w, "application/javascript")
+	}
+	if ext == `.deps` {
+		setHeaders(w, "text/plain")
 	}
 	http.ServeFile(w, r, filepath.Join(`html`, file))
 }
