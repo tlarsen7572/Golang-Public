@@ -1,6 +1,7 @@
 package ryxproject_test
 
 import (
+	"encoding/json"
 	"github.com/tlarsen7572/Golang-Public/ryx/ryxdoc"
 	"github.com/tlarsen7572/Golang-Public/ryx/ryxproject"
 	r "github.com/tlarsen7572/Golang-Public/ryx/testdocbuilder"
@@ -335,6 +336,44 @@ func TestRenameFolder(t *testing.T) {
 	if macroPath.FoundPath != expectedMacro {
 		t.Fatalf("could not find expected macro.\nexpected: %v\nfound: %v\nstored: %v", expectedMacro, macroPath.FoundPath, macroPath.StoredPath)
 	}
+}
+
+func TestListMacrosUsedInProject(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	defer r.RebuildTestdocs(baseFolder)
+
+	proj, _ := ryxproject.Open(baseFolder)
+	macros, err := proj.ListMacrosUsedInProject()
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	tagWithSets, ok := macros[`Tag with Sets.yxmc`]
+
+	if !ok {
+		t.Fatalf(`could not find 'Tag with Sets.yxmc' macro but it is used in the project`)
+	}
+
+	found := filepath.Join(baseFolder, `macros`, `Tag with Sets.yxmc`)
+	foundPath, ok := tagWithSets.FoundPaths[found]
+	if !ok {
+		t.Fatalf(`found path '%v' is not in list but it exists`, found)
+	}
+
+	stored := filepath.Join(`macros`, `Tag with Sets.yxmc`)
+	storedPath, ok := foundPath.StoredPaths[stored]
+	if !ok {
+		t.Fatalf(`stored path '%v' is not in list but it exists`, stored)
+	}
+
+	if count := len(storedPath.WhereUsed); count != 1 {
+		t.Fatalf(`expected 1 where used but got %v`, count)
+	}
+	where := filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`)
+	if storedPath.WhereUsed[0] != where {
+		t.Fatalf(`expected where used of '%v' but got '%v'`, where, storedPath.WhereUsed[0])
+	}
+	data, _ := json.Marshal(macros)
+	t.Logf(string(data))
 }
 
 func generateAbsPath(path ...string) (string, error) {

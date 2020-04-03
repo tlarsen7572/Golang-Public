@@ -221,6 +221,63 @@ func (ryxProject *RyxProject) WhereUsed(path string) []string {
 	return usage
 }
 
+type MacroNameInfo struct {
+	FoundPaths map[string]*MacroFoundInfo
+}
+
+type MacroFoundInfo struct {
+	StoredPaths map[string]*MacroStoredInfo
+}
+
+type MacroStoredInfo struct {
+	WhereUsed []string
+}
+
+func (ryxProject *RyxProject) ListMacrosUsedInProject() (map[string]*MacroNameInfo, error) {
+	docs, err := ryxProject.Docs()
+	if err != nil {
+		return nil, err
+	}
+	macroData := make(map[string]*MacroNameInfo)
+	for docPath, doc := range docs {
+		newMacroPaths := append(ryxProject.macroPaths, filepath.Dir(docPath))
+		for _, node := range doc.Nodes {
+			if node.ReadCategory() != ryxnode.Macro {
+				continue
+			}
+			macroPath := node.ReadMacro(newMacroPaths...)
+			_, name := filepath.Split(macroPath.StoredPath)
+			nameInfo, ok := macroData[name]
+			if !ok {
+				nameInfo = &MacroNameInfo{FoundPaths: make(map[string]*MacroFoundInfo)}
+				macroData[name] = nameInfo
+			}
+			foundInfo, ok := nameInfo.FoundPaths[macroPath.FoundPath]
+			if !ok {
+				foundInfo = &MacroFoundInfo{StoredPaths: make(map[string]*MacroStoredInfo)}
+				nameInfo.FoundPaths[macroPath.FoundPath] = foundInfo
+			}
+			storedInfo, ok := foundInfo.StoredPaths[macroPath.StoredPath]
+			if !ok {
+				storedInfo = &MacroStoredInfo{WhereUsed: []string{}}
+				foundInfo.StoredPaths[macroPath.StoredPath] = storedInfo
+			}
+			inWhereUsed := false
+			for _, whereUsedPath := range storedInfo.WhereUsed {
+				if whereUsedPath == docPath {
+					inWhereUsed = true
+					break
+				}
+			}
+			if !inWhereUsed {
+				storedInfo.WhereUsed = append(storedInfo.WhereUsed, docPath)
+			}
+		}
+	}
+
+	return macroData, nil
+}
+
 func docsFromStructure(structure *ryxfolder.RyxFolder) map[string]*ryxdoc.RyxDoc {
 	docs := map[string]*ryxdoc.RyxDoc{}
 	for _, file := range structure.AllFiles() {
