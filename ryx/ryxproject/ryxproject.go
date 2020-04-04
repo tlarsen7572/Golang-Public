@@ -295,6 +295,12 @@ func (ryxProject *RyxProject) BatchChangeMacroSettings(name string, newSetting s
 			macro := node.ReadMacro(macroPaths...)
 			_, macroName := filepath.Split(macro.StoredPath)
 			if strings.ToLower(macroName) == strings.ToLower(name) {
+				if len(onlyFoundPaths) > 0 && !StringsContain(onlyFoundPaths, macro.FoundPath) {
+					continue
+				}
+				if len(onlyStoredPaths) > 0 && !StringsContain(onlyStoredPaths, macro.StoredPath) {
+					continue
+				}
 				node.SetMacro(newSetting)
 				nodesChanged++
 			}

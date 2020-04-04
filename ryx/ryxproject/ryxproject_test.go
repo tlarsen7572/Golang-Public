@@ -399,6 +399,54 @@ func TestBatchChangeMacroSetting(t *testing.T) {
 	}
 }
 
+func TestBatchChangeMacroSettingOnlyMatchingFoundPaths(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	defer r.RebuildTestdocs(baseFolder)
+
+	proj, _ := ryxproject.Open(baseFolder)
+	relativeSetting := filepath.Join(`macros`, `Tag with Sets.yxmc`)
+	absSetting := filepath.Join(baseFolder, `macros`, `Tag with Sets.yxmc`)
+	changed, err := proj.BatchChangeMacroSettings(`Tag with Sets.yxmc`, absSetting, []string{`not\found\here`}, nil)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	if changed != 0 {
+		t.Fatalf(`expected 0 changed macros but got %v`, changed)
+	}
+	doc, err := proj.RetrieveDocument(filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`))
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	var nodes = doc.ReadMappedNodes()
+	if setting := nodes[18].ReadMacro().StoredPath; setting != relativeSetting {
+		t.Fatalf(`expected stored macro path to be '%v' but got '%v'`, relativeSetting, setting)
+	}
+}
+
+func TestBatchChangeMacroSettingOnlyMatchingStoredPaths(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	defer r.RebuildTestdocs(baseFolder)
+
+	proj, _ := ryxproject.Open(baseFolder)
+	relativeSetting := filepath.Join(`macros`, `Tag with Sets.yxmc`)
+	absSetting := filepath.Join(baseFolder, `macros`, `Tag with Sets.yxmc`)
+	changed, err := proj.BatchChangeMacroSettings(`Tag with Sets.yxmc`, absSetting, nil, []string{`not\found\here`})
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	if changed != 0 {
+		t.Fatalf(`expected 0 changed macros but got %v`, changed)
+	}
+	doc, err := proj.RetrieveDocument(filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`))
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	var nodes = doc.ReadMappedNodes()
+	if setting := nodes[18].ReadMacro().StoredPath; setting != relativeSetting {
+		t.Fatalf(`expected stored macro path to be '%v' but got '%v'`, relativeSetting, setting)
+	}
+}
+
 func generateAbsPath(path ...string) (string, error) {
 	return filepath.Abs(filepath.Join(path...))
 }
