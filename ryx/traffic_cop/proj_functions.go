@@ -36,6 +36,7 @@ const makeFilesRelativeFunc = `MakeFilesRelative`
 const makeAllRelativeFunc = `MakeAllFilesRelative`
 const makeAllAbsoluteFunc = `MakeAllFilesAbsolute`
 const renameFolderFunc = `RenameFolder`
+const listMacrosInProjectFunc = `ListMacrosInProject`
 const invalidProjFunc = `invalid project function`
 
 func handleProjFunction(call FunctionCall, data *TrafficCopData) FunctionResponse {
@@ -60,6 +61,8 @@ func handleProjFunction(call FunctionCall, data *TrafficCopData) FunctionRespons
 		return makeAllAbsolute(data)
 	case renameFolderFunc:
 		return renameFolder(call, data)
+	case listMacrosInProjectFunc:
+		return listMacrosInProject(data)
 	default:
 		return FunctionResponse{errors.New(invalidProjFunc), nil}
 	}
@@ -249,4 +252,15 @@ func renameFolder(call FunctionCall, data *TrafficCopData) FunctionResponse {
 	}
 	err := data.Project.RenameFolder(from, to)
 	return _errorResponse(err)
+}
+
+func listMacrosInProject(data *TrafficCopData) FunctionResponse {
+	macros, err := data.Project.ListMacrosUsedInProject()
+	if err != nil {
+		return _errorResponse(err)
+	}
+	return FunctionResponse{
+		Err:      nil,
+		Response: macros,
+	}
 }

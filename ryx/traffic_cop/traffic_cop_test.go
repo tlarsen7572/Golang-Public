@@ -70,6 +70,7 @@ func TestGetProjectStructure(t *testing.T) {
 	default:
 		t.Fatalf(`unexpected type %T`, v)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestGetDocumentStructure(t *testing.T) {
@@ -103,8 +104,7 @@ func TestGetDocumentStructure(t *testing.T) {
 	default:
 		t.Fatalf(`unexpected type %T`, v)
 	}
-	encoded, _ := json.Marshal(response)
-	t.Logf(string(encoded))
+	t.Logf(jsonResponse(response))
 }
 
 func TestGetDocStructureHasMacroToolData(t *testing.T) {
@@ -133,6 +133,7 @@ func TestGetDocStructureHasMacroToolData(t *testing.T) {
 	if structure.MacroToolData[0].Plugin == `` {
 		t.Fatalf(`expected a non-empty plugin but it was empty`)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestGetDocumentStructureExcludesInvalidNodes(t *testing.T) {
@@ -184,7 +185,7 @@ func TestGetRootFolders(t *testing.T) {
 	if folders[0] != `C:` {
 		t.Fatalf(`expected first folder to be 'C:' but got '%v'`, folders[0])
 	}
-
+	t.Logf(jsonResponse(response))
 }
 
 func TestBrowseFoldersWithoutFolderPath(t *testing.T) {
@@ -246,6 +247,7 @@ func TestGetIcons(t *testing.T) {
 	if toolData[0].Icon != `I am a picture in base64 encoding!` {
 		t.Fatalf(`expected tool icon of 'I am a picture in base64 encoding!' but got '%v'`, toolData[0].Icon)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestGetEmptyWorkflow(t *testing.T) {
@@ -269,6 +271,7 @@ func TestGetEmptyWorkflow(t *testing.T) {
 	if structure.Nodes == nil {
 		t.Fatalf(`expected empty list of nodes, not nil`)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestWhereUsed(t *testing.T) {
@@ -289,6 +292,7 @@ func TestWhereUsed(t *testing.T) {
 	if len(whereUsed) != 1 {
 		t.Fatalf(`expected 1 where used but got %v`, len(whereUsed))
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestRenameFiles(t *testing.T) {
@@ -322,6 +326,7 @@ func TestRenameFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestMoveFiles(t *testing.T) {
@@ -354,6 +359,7 @@ func TestMoveFiles(t *testing.T) {
 	if count := len(errs); count > 0 {
 		t.Fatalf(`expected no errors but got %v`, count)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestMoveFilesInvalidFilesParam(t *testing.T) {
@@ -460,6 +466,7 @@ func TestMakeFilesAbsolute(t *testing.T) {
 	if changed != 1 {
 		t.Fatalf(`expected 1 document to be changed but got %v`, changed)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestMakeFilesAbsoluteMissingMacro(t *testing.T) {
@@ -510,6 +517,7 @@ func TestMakeFilesRelative(t *testing.T) {
 	if changed != 1 {
 		t.Fatalf(`expected 1 document to be changed but got %v`, changed)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestMakeFilesRelativeMissingFiles(t *testing.T) {
@@ -558,6 +566,7 @@ func TestMakeAllFilesRelative(t *testing.T) {
 	if changed != 2 {
 		t.Fatalf(`expected 2 changed documents but got %v`, changed)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestMakeAllFilesAbsolute(t *testing.T) {
@@ -583,6 +592,7 @@ func TestMakeAllFilesAbsolute(t *testing.T) {
 	if changed != 2 {
 		t.Fatalf(`expected 2 changed documents but got %v`, changed)
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestInterfaceNodesDocumentStructure(t *testing.T) {
@@ -611,8 +621,7 @@ func TestInterfaceNodesDocumentStructure(t *testing.T) {
 	if count := len(structure.Nodes); count != 40 {
 		t.Fatalf(`expected 40 nodes but got %v`, count)
 	}
-	encoded, _ := json.Marshal(response)
-	t.Logf(string(encoded))
+	t.Logf(jsonResponse(response))
 }
 
 func TestRenameFolder(t *testing.T) {
@@ -636,6 +645,7 @@ func TestRenameFolder(t *testing.T) {
 	if response.Err != nil {
 		t.Fatalf(`expected no error but got: %v`, response.Err.Error())
 	}
+	t.Logf(jsonResponse(response))
 }
 
 func TestRenameFolderWithoutFrom(t *testing.T) {
@@ -682,6 +692,36 @@ func TestRenameFolderWithoutTo(t *testing.T) {
 		t.Fatalf(`expected an error but got none`)
 	}
 	t.Logf(response.Err.Error())
+}
+
+func TestListMacrosUsedInProject(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "ListMacrosInProject",
+		Parameters: params{},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err != nil {
+		t.Fatalf(`expected no error but got: %v`, response.Err.Error())
+	}
+	t.Logf(jsonResponse(response))
+}
+
+func jsonResponse(response cop.FunctionResponse) string {
+	marshalled, err := json.Marshal(response)
+	if err != nil {
+		return err.Error()
+	}
+	return string(marshalled)
 }
 
 func rebuildTestDocs() {
