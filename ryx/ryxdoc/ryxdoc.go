@@ -8,11 +8,14 @@ import (
 )
 
 type RyxDoc struct {
-	XMLName     xml.Name           `xml:"AlteryxDocument"`
-	YxmdVer     string             `xml:"yxmdVer,attr"`
-	Nodes       []*ryxnode.RyxNode `xml:"Nodes>Node"`
-	Connections []*RyxConn         `xml:"Connections>Connection"`
-	Properties  *txml.Node         `xml:"Properties"`
+	XMLName xml.Name           `xml:"AlteryxDocument"`
+	YxmdVer string             `xml:"yxmdVer,attr"`
+	Nodes   []*ryxnode.RyxNode `xml:"Nodes>Node"` // Be careful using Nodes directly.  This field does not
+	// give you all nodes in a document, only the root nodes.
+	// Nodes can themselves contain nodes.  To iterate through all
+	// nodes in a document, use ReadMappedNodes()
+	Connections []*RyxConn `xml:"Connections>Connection"`
+	Properties  *txml.Node `xml:"Properties"`
 	nextId      int
 }
 
@@ -51,7 +54,7 @@ func ReadBytes(content []byte) (*RyxDoc, error) {
 
 func (ryxDoc *RyxDoc) ReadMappedNodes() map[int]*ryxnode.RyxNode {
 	nodes := map[int]*ryxnode.RyxNode{}
-	for _, node := range ryxDoc.Nodes {
+	for _, node := range ryxDoc.Nodes { // It is ok to use RyxDoc.Nodes here
 		addNodeToMap(node, nodes)
 		for _, child := range node.ReadChildren() {
 			addNodeToMap(child, nodes)
@@ -62,14 +65,14 @@ func (ryxDoc *RyxDoc) ReadMappedNodes() map[int]*ryxnode.RyxNode {
 
 func (ryxDoc *RyxDoc) RemoveNodes(nodeIds ...int) {
 	currentIndex := 0
-	for _, node := range ryxDoc.Nodes {
+	for _, node := range ryxDoc.Nodes { // It is ok to use RyxDoc.Nodes here
 		if !node.MatchesIds(nodeIds...) {
-			ryxDoc.Nodes[currentIndex] = node
+			ryxDoc.Nodes[currentIndex] = node // It is ok to use RyxDoc.Nodes here
 			node.RemoveChildren(nodeIds...)
 			currentIndex += 1
 		}
 	}
-	ryxDoc.Nodes = ryxDoc.Nodes[0:currentIndex]
+	ryxDoc.Nodes = ryxDoc.Nodes[0:currentIndex] // It is ok to use RyxDoc.Nodes here
 }
 
 func (ryxDoc *RyxDoc) RemoveConnectionsBetween(toolIds ...int) {
@@ -104,7 +107,7 @@ func (ryxDoc *RyxDoc) RemoveConnectionsBetween(toolIds ...int) {
 func (ryxDoc *RyxDoc) AddMacroAt(path string, x float64, y float64) *ryxnode.RyxNode {
 	id := ryxDoc.grabNextIdAndIncrement()
 	macro := ryxnode.NewMacro(id, path, x, y)
-	ryxDoc.Nodes = append(ryxDoc.Nodes, macro)
+	ryxDoc.Nodes = append(ryxDoc.Nodes, macro) // It is ok to use RyxDoc.Nodes here
 	return macro
 }
 
@@ -122,7 +125,7 @@ func (ryxDoc *RyxDoc) RenameMacroNodes(macroAbsPaths []string, newPaths []string
 
 func (ryxDoc *RyxDoc) MakeAllMacrosAbsolute(macroPaths ...string) int {
 	changed := 0
-	for _, node := range ryxDoc.Nodes {
+	for _, node := range ryxDoc.ReadMappedNodes() {
 		err := node.MakeMacroAbsolute(macroPaths...)
 		if err == nil {
 			changed++
@@ -140,7 +143,7 @@ func (ryxDoc *RyxDoc) MakeMacrosAbsolute(macroAbsPaths []string, macroPaths ...s
 
 func (ryxDoc *RyxDoc) MakeAllMacrosRelative(relativeTo string, macroPaths ...string) int {
 	changed := 0
-	for _, node := range ryxDoc.Nodes {
+	for _, node := range ryxDoc.ReadMappedNodes() {
 		err := node.MakeMacroRelative(relativeTo, macroPaths...)
 		if err == nil {
 			changed++
@@ -180,7 +183,7 @@ func (ryxDoc *RyxDoc) grabNextIdAndIncrement() int {
 
 func (ryxDoc *RyxDoc) _changeMacrosIfMatches(macroAbsPaths []string, changer func(node *ryxnode.RyxNode, macroAbsPathIndex int) error, macroPaths ...string) int {
 	changed := 0
-	for _, node := range ryxDoc.Nodes {
+	for _, node := range ryxDoc.ReadMappedNodes() {
 		macro := node.ReadMacro(macroPaths...)
 		for macroAbsPathIndex, macroAbsPath := range macroAbsPaths {
 			if macro.FoundPath == macroAbsPath {

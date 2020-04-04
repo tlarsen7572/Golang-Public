@@ -376,6 +376,29 @@ func TestListMacrosUsedInProject(t *testing.T) {
 	t.Logf(string(data))
 }
 
+func TestBatchChangeMacroSetting(t *testing.T) {
+	r.RebuildTestdocs(baseFolder)
+	defer r.RebuildTestdocs(baseFolder)
+
+	proj, _ := ryxproject.Open(baseFolder)
+	newSetting := filepath.Join(baseFolder, `macros`, `Tag with Sets.yxmc`)
+	changed, err := proj.BatchChangeMacroSettings(`Tag with Sets.yxmc`, newSetting, nil, nil)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	if changed != 1 {
+		t.Fatalf(`expected 1 changed macro but got %v`, changed)
+	}
+	doc, err := proj.RetrieveDocument(filepath.Join(baseFolder, `01 SETLEAF Equations Completed.yxmd`))
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	var nodes = doc.ReadMappedNodes()
+	if setting := nodes[18].ReadMacro().StoredPath; setting != newSetting {
+		t.Fatalf(`expected stored macro path to be '%v' but got '%v'`, newSetting, setting)
+	}
+}
+
 func generateAbsPath(path ...string) (string, error) {
 	return filepath.Abs(filepath.Join(path...))
 }

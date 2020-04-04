@@ -93,55 +93,8 @@ func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionRespo
 
 	nodes := []NodeStructure{}
 	toolData := []tool_data_loader.ToolData{}
-	for _, node := range doc.Nodes {
-		id, err := node.ReadId()
-		if err != nil {
-			continue
-		}
-		plugin := node.ReadPlugin()
-		if plugin == `AlteryxGuiToolkit.Questions.Tab.Tab` {
-			continue
-		}
-		position, err := node.ReadPosition()
-		if err != nil {
-			position = ryxnode.Position{X: 0, Y: 0, Width: 0, Height: 0}
-		}
-		macro := node.ReadMacro(macroPaths...)
-		category := node.ReadCategory().String()
-		nodes = append(nodes, NodeStructure{
-			ToolId:      id,
-			X:           position.X,
-			Y:           position.Y,
-			Width:       position.Width,
-			Height:      position.Height,
-			Plugin:      plugin,
-			StoredMacro: macro.StoredPath,
-			FoundMacro:  macro.FoundPath,
-			Category:    category,
-		})
-		if plugin := macro.StoredPath; plugin != `` && macro.FoundPath != `` {
-			needsToolData := true
-			for _, existing := range call.Config.ToolData {
-				if plugin == existing.Plugin {
-					needsToolData = false
-					break
-				}
-			}
-			if needsToolData {
-				for _, alreadyGotIt := range toolData {
-					if alreadyGotIt.Plugin == macro.FoundPath {
-						needsToolData = false
-						break
-					}
-				}
-			}
-			if needsToolData {
-				data, err := tool_data_loader.ReadSingleMacro(macro.FoundPath, ``)
-				if err == nil {
-					toolData = append(toolData, data)
-				}
-			}
-		}
+	for _, node := range doc.Nodes { // It is ok to use RyxDoc.Nodes here
+		nodes, toolData = processDocStructureNode(call, node, macroPaths, nodes, toolData)
 	}
 
 	connections := doc.Connections
@@ -155,6 +108,61 @@ func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionRespo
 		MacroToolData: toolData,
 	}
 	return FunctionResponse{nil, docStructure}
+}
+
+func processDocStructureNode(call FunctionCall, node *ryxnode.RyxNode, macroPaths []string, nodes []NodeStructure, toolData []tool_data_loader.ToolData) ([]NodeStructure, []tool_data_loader.ToolData) {
+	id, err := node.ReadId()
+	if err != nil {
+		return nodes, toolData
+	}
+	plugin := node.ReadPlugin()
+	if plugin == `AlteryxGuiToolkit.Questions.Tab.Tab` {
+		return nodes, toolData
+	}
+	position, err := node.ReadPosition()
+	if err != nil {
+		position = ryxnode.Position{X: 0, Y: 0, Width: 0, Height: 0}
+	}
+	macro := node.ReadMacro(macroPaths...)
+	category := node.ReadCategory().String()
+	nodes = append(nodes, NodeStructure{
+		ToolId:      id,
+		X:           position.X,
+		Y:           position.Y,
+		Width:       position.Width,
+		Height:      position.Height,
+		Plugin:      plugin,
+		StoredMacro: macro.StoredPath,
+		FoundMacro:  macro.FoundPath,
+		Category:    category,
+	})
+	if plugin := macro.StoredPath; plugin != `` && macro.FoundPath != `` {
+		needsToolData := true
+		for _, existing := range call.Config.ToolData {
+			if plugin == existing.Plugin {
+				needsToolData = false
+				break
+			}
+		}
+		if needsToolData {
+			for _, alreadyGotIt := range toolData {
+				if alreadyGotIt.Plugin == macro.FoundPath {
+					needsToolData = false
+					break
+				}
+			}
+		}
+		if needsToolData {
+			data, err := tool_data_loader.ReadSingleMacro(macro.FoundPath, ``)
+			if err == nil {
+				toolData = append(toolData, data)
+			}
+		}
+	}
+	for _, childNode := range node.ChildNodes {
+		nodes, toolData = processDocStructureNode(call, childNode, macroPaths, nodes, toolData)
+	}
+	return nodes, toolData
 }
 
 func whereUsed(call FunctionCall, data *TrafficCopData) FunctionResponse {

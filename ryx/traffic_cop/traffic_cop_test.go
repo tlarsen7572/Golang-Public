@@ -100,6 +100,10 @@ func TestGetDocumentStructure(t *testing.T) {
 	}
 	switch v := response.Response.(type) {
 	case cop.DocumentStructure:
+
+		if count := len(v.Nodes); count != 16 {
+			t.Fatalf(`expected 16 nodes but got %v`, count)
+		}
 		break
 	default:
 		t.Fatalf(`unexpected type %T`, v)

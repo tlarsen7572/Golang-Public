@@ -110,7 +110,7 @@ func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *r
 
 	questionTabId := newMacro.grabNextIdAndIncrement()
 	questionTab := newQuestionTab(questionTabId)
-	newMacro.Nodes = append(newMacro.Nodes, questionTab)
+	newMacro.Nodes = append(newMacro.Nodes, questionTab) // It is ok to use RyxDoc.Nodes here
 	tab := addTabQuestion(newMacro, questionTabId)
 
 	inputCount := 0.0
@@ -124,7 +124,7 @@ func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *r
 			outputId := newMacro.grabNextIdAndIncrement()
 			output := newMacroOutput(outputId, outputX, y)
 			addQuestionToTab(tab, `MacroOutput`, fmt.Sprintf(`Macro Output (%v)`, outputId), outputId)
-			newMacro.Nodes = append(newMacro.Nodes, output)
+			newMacro.Nodes = append(newMacro.Nodes, output) // It is ok to use RyxDoc.Nodes here
 			newMacro.AddConnection(&RyxConn{
 				Name:       connection.Name,
 				FromId:     connection.FromId,
@@ -141,7 +141,7 @@ func generateMacroConnections(newMacro *RyxDoc, origDoc *RyxDoc, newMacroTool *r
 			inputId := newMacro.grabNextIdAndIncrement()
 			input := newMacroInput(inputId, gridStartPos, y)
 			addQuestionToTab(tab, `MacroInput`, fmt.Sprintf(`Macro Input (%v)`, inputId), inputId)
-			newMacro.Nodes = append(newMacro.Nodes, input)
+			newMacro.Nodes = append(newMacro.Nodes, input) // It is ok to use RyxDoc.Nodes here
 			newMacro.AddConnection(&RyxConn{
 				Name:       connection.Name,
 				FromId:     inputId,
@@ -175,10 +175,10 @@ func generateDocFrom(from *RyxDoc, toolIds ...int) *RyxDoc {
 }
 
 func copyNodes(from *RyxDoc, to *RyxDoc, toolIds ...int) {
-	for _, node := range from.Nodes {
+	for _, node := range from.Nodes { // It is ok to use RyxDoc.Nodes here
 		for _, id := range toolIds {
 			if checkId, _ := node.ReadId(); checkId == id {
-				to.Nodes = append(to.Nodes, node)
+				to.Nodes = append(to.Nodes, node) // It is ok to use RyxDoc.Nodes here
 				break
 			}
 		}
@@ -200,7 +200,7 @@ func (ryxDoc *RyxDoc) getBoundingBox(toolIds ...int) (left float64, top float64,
 	top = maxDouble()
 	right = 0
 	bottom = 0
-	for _, node := range ryxDoc.Nodes {
+	for _, node := range ryxDoc.ReadMappedNodes() {
 		for _, id := range toolIds {
 			if checkId, _ := node.ReadId(); checkId == id {
 				if position, err := node.ReadPosition(); err == nil {

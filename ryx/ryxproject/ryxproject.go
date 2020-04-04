@@ -241,7 +241,7 @@ func (ryxProject *RyxProject) ListMacrosUsedInProject() (map[string]*MacroNameIn
 	macroData := make(map[string]*MacroNameInfo)
 	for docPath, doc := range docs {
 		newMacroPaths := append(ryxProject.macroPaths, filepath.Dir(docPath))
-		for _, node := range doc.Nodes {
+		for _, node := range doc.ReadMappedNodes() {
 			if node.ReadCategory() != ryxnode.Macro {
 				continue
 			}
@@ -276,6 +276,36 @@ func (ryxProject *RyxProject) ListMacrosUsedInProject() (map[string]*MacroNameIn
 	}
 
 	return macroData, nil
+}
+
+func (ryxProject *RyxProject) BatchChangeMacroSettings(name string, newSetting string, onlyFoundPaths []string, onlyStoredPaths []string) (int, error) {
+	docs, err := ryxProject.Docs()
+	if err != nil {
+		return 0, err
+	}
+	docsChanged := 0
+	for docPath, doc := range docs {
+		nodesChanged := 0
+		docPathDir := filepath.Dir(docPath)
+		macroPaths := append(ryxProject.macroPaths, docPathDir)
+		for _, node := range doc.ReadMappedNodes() {
+			if node.ReadCategory() != ryxnode.Macro {
+				continue
+			}
+			macro := node.ReadMacro(macroPaths...)
+			_, macroName := filepath.Split(macro.StoredPath)
+			if strings.ToLower(macroName) == strings.ToLower(name) {
+				node.SetMacro(newSetting)
+				nodesChanged++
+			}
+		}
+		if nodesChanged > 0 {
+			docsChanged++
+			doc.Save(docPath)
+		}
+	}
+
+	return docsChanged, nil
 }
 
 func docsFromStructure(structure *ryxfolder.RyxFolder) map[string]*ryxdoc.RyxDoc {
@@ -383,7 +413,7 @@ func (ryxProject *RyxProject) _collectAffectedNodes(oldPaths []string, newPaths 
 	for path, doc := range docs {
 		folder := filepath.Dir(path)
 		affectedMacros := 0
-		for _, node := range doc.Nodes {
+		for _, node := range doc.ReadMappedNodes() {
 			if node.ReadCategory() != ryxnode.Macro {
 				continue
 			}
