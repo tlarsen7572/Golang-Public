@@ -30,6 +30,10 @@ func _errorResponse(err error) FunctionResponse {
 	}
 }
 
+func _validResponse(value interface{}) FunctionResponse {
+	return FunctionResponse{Err: nil, Response: value}
+}
+
 func _stringParamErr(param string) error {
 	return errors.New(fmt.Sprintf(`the %v parameter was not included or was not a string`, param))
 }

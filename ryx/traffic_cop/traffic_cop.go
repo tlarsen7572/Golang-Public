@@ -49,7 +49,7 @@ func StartTrafficCop(in chan FunctionCall) {
 
 		data, err := buildProject(projectPath, call.Config.MacroPaths()...)
 		if err != nil {
-			call.Out <- FunctionResponse{err, nil}
+			call.Out <- _errorResponse(err)
 			continue
 		}
 		projects[projectPath] = data

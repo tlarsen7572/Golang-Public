@@ -16,7 +16,7 @@ func handleAppFunction(call FunctionCall) FunctionResponse {
 	case getToolDataFunc:
 		return getToolData(call)
 	default:
-		return FunctionResponse{errors.New(invalidAppFunc), nil}
+		return _errorResponse(errors.New(invalidAppFunc))
 	}
 }
 
@@ -27,12 +27,12 @@ func browseFolder(call FunctionCall) FunctionResponse {
 	}
 	controller := folders.InitializeFolderController(call.Config.BrowseFolderRoots...)
 	contents, err := controller.ReadFolder(folderPath)
-	return FunctionResponse{err, contents}
+	if err != nil {
+		return _errorResponse(err)
+	}
+	return _validResponse(contents)
 }
 
 func getToolData(call FunctionCall) FunctionResponse {
-	return FunctionResponse{
-		Err:      nil,
-		Response: call.Config.ToolData,
-	}
+	return _validResponse(call.Config.ToolData)
 }

@@ -37,6 +37,7 @@ const makeAllRelativeFunc = `MakeAllFilesRelative`
 const makeAllAbsoluteFunc = `MakeAllFilesAbsolute`
 const renameFolderFunc = `RenameFolder`
 const listMacrosInProjectFunc = `ListMacrosInProject`
+const batchUpdateMacroSettingsFunc = `BatchUpdateMacroSettings`
 const invalidProjFunc = `invalid project function`
 
 func handleProjFunction(call FunctionCall, data *TrafficCopData) FunctionResponse {
@@ -63,8 +64,10 @@ func handleProjFunction(call FunctionCall, data *TrafficCopData) FunctionRespons
 		return renameFolder(call, data)
 	case listMacrosInProjectFunc:
 		return listMacrosInProject(data)
+	case batchUpdateMacroSettingsFunc:
+		return batchUpdateMacroSettings(call, data)
 	default:
-		return FunctionResponse{errors.New(invalidProjFunc), nil}
+		return _errorResponse(errors.New(invalidProjFunc))
 	}
 }
 
@@ -73,7 +76,7 @@ func getProjectStructure(data *TrafficCopData) FunctionResponse {
 	if err != nil {
 		return _errorResponse(err)
 	}
-	return FunctionResponse{nil, structure}
+	return _validResponse(structure)
 }
 
 func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionResponse {
@@ -107,7 +110,7 @@ func getDocumentStructure(call FunctionCall, data *TrafficCopData) FunctionRespo
 		Connections:   connections,
 		MacroToolData: toolData,
 	}
-	return FunctionResponse{nil, docStructure}
+	return _validResponse(docStructure)
 }
 
 func processDocStructureNode(call FunctionCall, node *ryxnode.RyxNode, macroPaths []string, nodes []NodeStructure, toolData []tool_data_loader.ToolData) ([]NodeStructure, []tool_data_loader.ToolData) {
@@ -171,7 +174,7 @@ func whereUsed(call FunctionCall, data *TrafficCopData) FunctionResponse {
 		return _errorResponse(_stringParamErr(`FilePath`))
 	}
 	whereUsed := data.Project.WhereUsed(path)
-	return FunctionResponse{nil, whereUsed}
+	return _validResponse(whereUsed)
 }
 
 func makeFilesAbsolute(call FunctionCall, data *TrafficCopData) FunctionResponse {
@@ -180,10 +183,7 @@ func makeFilesAbsolute(call FunctionCall, data *TrafficCopData) FunctionResponse
 		return _errorResponse(err)
 	}
 	result := data.Project.MakeFilesAbsolute(macros)
-	return FunctionResponse{
-		Err:      nil,
-		Response: result,
-	}
+	return _validResponse(result)
 }
 
 func makeFilesRelative(call FunctionCall, data *TrafficCopData) FunctionResponse {
@@ -192,26 +192,17 @@ func makeFilesRelative(call FunctionCall, data *TrafficCopData) FunctionResponse
 		return _errorResponse(err)
 	}
 	result := data.Project.MakeFilesRelative(macros)
-	return FunctionResponse{
-		Err:      nil,
-		Response: result,
-	}
+	return _validResponse(result)
 }
 
 func makeAllRelative(data *TrafficCopData) FunctionResponse {
 	result := data.Project.MakeAllFilesRelative()
-	return FunctionResponse{
-		Err:      nil,
-		Response: result,
-	}
+	return _validResponse(result)
 }
 
 func makeAllAbsolute(data *TrafficCopData) FunctionResponse {
 	result := data.Project.MakeAllFilesAbsolute()
-	return FunctionResponse{
-		Err:      nil,
-		Response: result,
-	}
+	return _validResponse(result)
 }
 
 func renameFiles(call FunctionCall, data *TrafficCopData) FunctionResponse {
@@ -227,10 +218,7 @@ func renameFiles(call FunctionCall, data *TrafficCopData) FunctionResponse {
 	if err != nil {
 		return _errorResponse(err)
 	}
-	return FunctionResponse{
-		Err:      nil,
-		Response: errFiles,
-	}
+	return _validResponse(errFiles)
 }
 
 func moveFiles(call FunctionCall, data *TrafficCopData) FunctionResponse {
@@ -243,10 +231,10 @@ func moveFiles(call FunctionCall, data *TrafficCopData) FunctionResponse {
 		return _errorResponse(_stringParamErr(`MoveTo`))
 	}
 	errFiles, err := data.Project.MoveFiles(fromFiles, to)
-	return FunctionResponse{
-		Err:      err,
-		Response: errFiles,
+	if err != nil {
+		_errorResponse(err)
 	}
+	return _validResponse(errFiles)
 }
 
 func renameFolder(call FunctionCall, data *TrafficCopData) FunctionResponse {
@@ -267,8 +255,29 @@ func listMacrosInProject(data *TrafficCopData) FunctionResponse {
 	if err != nil {
 		return _errorResponse(err)
 	}
-	return FunctionResponse{
-		Err:      nil,
-		Response: macros,
+	return _validResponse(macros)
+}
+
+func batchUpdateMacroSettings(call FunctionCall, data *TrafficCopData) FunctionResponse {
+	name, ok := call.Parameters[`Name`].(string)
+	if !ok {
+		return _errorResponse(_stringParamErr(`Name`))
 	}
+	newSetting, ok := call.Parameters[`NewSetting`].(string)
+	if !ok {
+		return _errorResponse(_stringParamErr(`NewSetting`))
+	}
+	onlyFoundPaths, err := _parseStringList(call.Parameters, `OnlyFoundPaths`)
+	if err != nil {
+		return _errorResponse(err)
+	}
+	onlyStoredPaths, err := _parseStringList(call.Parameters, `OnlyStoredPaths`)
+	if err != nil {
+		return _errorResponse(err)
+	}
+	changed, err := data.Project.BatchChangeMacroSettings(name, newSetting, onlyFoundPaths, onlyStoredPaths)
+	if err != nil {
+		return _errorResponse(err)
+	}
+	return _validResponse(changed)
 }

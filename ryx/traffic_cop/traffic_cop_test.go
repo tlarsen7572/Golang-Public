@@ -672,7 +672,7 @@ func TestRenameFolderWithoutFrom(t *testing.T) {
 	if response.Err == nil {
 		t.Fatalf(`expected an error but got none`)
 	}
-	t.Logf(response.Err.Error())
+	t.Logf(jsonResponse(response))
 }
 
 func TestRenameFolderWithoutTo(t *testing.T) {
@@ -716,6 +716,116 @@ func TestListMacrosUsedInProject(t *testing.T) {
 	response := <-out
 	if response.Err != nil {
 		t.Fatalf(`expected no error but got: %v`, response.Err.Error())
+	}
+	t.Logf(jsonResponse(response))
+}
+
+func TestBatchUpdateMacroSettings(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "BatchUpdateMacroSettings",
+		Parameters: params{`Name`: `Tag with Sets.yxmc`, `NewSetting`: `abcdefg`, `OnlyFoundPaths`: []interface{}{`1/2/3`}, `OnlyStoredPaths`: []interface{}{`4/5/6`}},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err != nil {
+		t.Fatalf(`expected no error but got: %v`, response.Err.Error())
+	}
+	t.Logf(jsonResponse(response))
+}
+
+func TestBatchUpdateMacroSettingsWithoutName(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "BatchUpdateMacroSettings",
+		Parameters: params{`NewSetting`: `abcdefg`, `OnlyFoundPaths`: []interface{}{`1/2/3`}, `OnlyStoredPaths`: []interface{}{`4/5/6`}},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err == nil {
+		t.Fatalf(`expected an error but got none`)
+	}
+	t.Logf(jsonResponse(response))
+}
+
+func TestBatchUpdateMacroSettingsWithoutNewSetting(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "BatchUpdateMacroSettings",
+		Parameters: params{`Name`: `abcdefg`, `OnlyFoundPaths`: []interface{}{`1/2/3`}, `OnlyStoredPaths`: []interface{}{`4/5/6`}},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err == nil {
+		t.Fatalf(`expected an error but got none`)
+	}
+	t.Logf(jsonResponse(response))
+}
+
+func TestBatchUpdateMacroSettingsWithoutOnlyFoundPaths(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "BatchUpdateMacroSettings",
+		Parameters: params{`Name`: `abcdefg`, `NewSetting`: `blah blah blah`, `OnlyStoredPaths`: []interface{}{`4/5/6`}},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err == nil {
+		t.Fatalf(`expected an error but got none`)
+	}
+	t.Logf(jsonResponse(response))
+}
+
+func TestBatchUpdateMacroSettingsWithoutOnlyStoredPaths(t *testing.T) {
+	rebuildTestDocs()
+	defer rebuildTestDocs()
+
+	in := make(chan cop.FunctionCall)
+	out := make(chan cop.FunctionResponse)
+	go cop.StartTrafficCop(in)
+
+	in <- cop.FunctionCall{
+		Out:        out,
+		Project:    workFolder,
+		Function:   "BatchUpdateMacroSettings",
+		Parameters: params{`Name`: `abcdefg`, `NewSetting`: `blah blah blah`, `OnlyFoundPaths`: []interface{}{`4/5/6`}},
+		Config:     &config.Config{},
+	}
+	response := <-out
+	if response.Err == nil {
+		t.Fatalf(`expected an error but got none`)
 	}
 	t.Logf(jsonResponse(response))
 }
