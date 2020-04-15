@@ -403,3 +403,40 @@ func TestReadPlugin(t *testing.T) {
 		t.Fatalf(`expected plugin 'AlteryxBasePluginsGui.DbFileInput.DbFileInput' but got '%v'`, plugin)
 	}
 }
+
+func TestMacroInputNodeHasMetaInfo(t *testing.T) {
+	oldXml := `<Node ToolID="1"><GuiSettings Plugin="AlteryxBasePluginsGui.MacroInput.MacroInput"><Position x="114" y="258"></Position></GuiSettings><Properties><Configuration></Configuration><Annotation DisplayMode="0"></Annotation><MetaInfo connection="Output"><RecordInfo><Field name="RCLNT" size="3" source="TextInput:" type="String"></Field><Field name="RYEAR" source="TextInput:" type="Int16"></Field></RecordInfo></MetaInfo></Properties><EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxMacroInput"></EngineSettings></Node>`
+
+	node, err := ryxnode.GenerateNodeFromXml(oldXml)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	newXmlBytes, err := xml.Marshal(node)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	newXml := string(newXmlBytes)
+	if newXml != oldXml {
+		t.Fatalf("expected\n'%v'\nbut got\n'%v", oldXml, newXml)
+	}
+	t.Logf(newXml)
+}
+
+func TestAllOtherNodesHaveNoMetaInfo(t *testing.T) {
+	oldXml := `<Node ToolID="1"><GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter"><Position x="114" y="258"></Position></GuiSettings><Properties><Configuration></Configuration><Annotation DisplayMode="0"></Annotation><MetaInfo connection="True"><RecordInfo><Field name="RCLNT" size="3" source="TextInput:" type="String"></Field><Field name="RYEAR" source="TextInput:" type="Int16"></Field></RecordInfo></MetaInfo></Properties><EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter"></EngineSettings></Node>`
+
+	node, err := ryxnode.GenerateNodeFromXml(oldXml)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	newXmlBytes, err := xml.Marshal(node)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	newXml := string(newXmlBytes)
+	expectedXml := `<Node ToolID="1"><GuiSettings Plugin="AlteryxBasePluginsGui.Filter.Filter"><Position x="114" y="258"></Position></GuiSettings><Properties><Configuration></Configuration><Annotation DisplayMode="0"></Annotation></Properties><EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFilter"></EngineSettings></Node>`
+	if newXml != expectedXml {
+		t.Fatalf("expected\n'%v'\nbut got\n'%v", expectedXml, newXml)
+	}
+	t.Logf(newXml)
+}

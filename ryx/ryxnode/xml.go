@@ -65,10 +65,15 @@ func (ryxNode *RyxNode) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 	if container.EngineSettings != nil {
 		engineSettings = container.EngineSettings
 	}
+	properties := container.Properties
+	plugin, ok := guiSettings.Attributes[`Plugin`]
+	if properties != nil && (!ok || plugin != `AlteryxBasePluginsGui.MacroInput.MacroInput`) {
+		properties.MetaInfo = nil
+	}
 	ryxNode.ToolId = container.ToolId
 	ryxNode.GuiSettings = guiSettings
 	ryxNode.EngineSettings = engineSettings
-	ryxNode.Properties = container.Properties
+	ryxNode.Properties = properties
 	ryxNode.ChildNodes = container.ChildNodes
 	return nil
 }

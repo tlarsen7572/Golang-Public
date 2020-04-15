@@ -22,6 +22,7 @@ type RyxNode struct {
 type Properties struct {
 	Configuration Configuration `xml:"Configuration"`
 	Annotation    *txml.Node    `xml:"Annotation"`
+	MetaInfo      *txml.Node    `xml:"MetaInfo"`
 }
 
 type Configuration struct {
