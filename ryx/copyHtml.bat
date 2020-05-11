@@ -1,1 +1,1 @@
-xcopy /i /e /Y ryx\html ..\..\..\..\bin\html
+xcopy /i /e /Y ryx\html F:\refactoryx\html
