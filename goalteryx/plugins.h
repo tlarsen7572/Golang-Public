@@ -62,9 +62,11 @@ struct EngineInterface {
 
 // For the glue
 
-long PiPushAllRecords(void * handle, __int64 nRecordLimit);
+void * GetPlugin();
 
-long _stdcall AlteryxGoPlugin(int nToolID,
+long __declspec(dllexport) PiPushAllRecords(void * handle, __int64 nRecordLimit);
+
+long AlteryxGoPlugin(int nToolID,
 	const wchar_t *pXmlProperties,
 	struct EngineInterface *pEngineInterface,
 	struct PluginInterface *r_pluginInterface);

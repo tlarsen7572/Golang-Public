@@ -4,15 +4,15 @@ package main
 #include "plugins.h"
 */
 import "C"
-import (
-	"github.com/mattn/go-pointer"
-	"unicode/utf16"
-	"unsafe"
-)
+import "unicode/utf16"
+import "unsafe"
+import "github.com/mattn/go-pointer"
 
 func main() {
 
 }
+
+var MyPlugin Plugin
 
 type Plugin interface {
 	PushAllRecords(recordLimit int) int
@@ -22,6 +22,11 @@ type Plugin interface {
 func PiPushAllRecords(handle unsafe.Pointer, recordLimit C.__int64) C.long {
 	alteryxPlugin := pointer.Restore(handle).(Plugin)
 	return C.long(alteryxPlugin.PushAllRecords(int(recordLimit)))
+}
+
+//export GetPlugin
+func GetPlugin() unsafe.Pointer {
+	return pointer.Save(MyPlugin)
 }
 
 func UTF16ToString(s []uint16) string {
