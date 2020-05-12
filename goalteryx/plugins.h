@@ -8,7 +8,7 @@ struct RecordData
 
 };
 
-typedef long ( _stdcall * T_II_Init)(void * handle, const wchar_t * pXmlRecordMetaInfo);
+typedef long ( _stdcall * T_II_Init)(void * handle, void * pXmlRecordMetaInfo);
 typedef long ( _stdcall * T_II_PushRecord)(void * handle, const struct RecordData * pRecord);
 typedef void ( _stdcall * T_II_UpdateProgress)(void * handle, double dPercent);
 typedef void ( _stdcall * T_II_Close)(void * handle);
@@ -28,11 +28,11 @@ struct IncomingConnectionInterface
 typedef void ( _stdcall * T_PI_Close)(void * handle, bool bHasErrors);
 typedef long ( _stdcall * T_PI_PushAllRecords)(void * handle, __int64 nRecordLimit);
 typedef long ( _stdcall * T_PI_AddIncomingConnection)(void * handle,
-    const wchar_t *pIncomingConnectionType,
-    const wchar_t *pIncomingConnectionName,
+    void * pIncomingConnectionType,
+    void * pIncomingConnectionName,
     struct IncomingConnectionInterface *r_IncConnInt);
 typedef long ( _stdcall * T_PI_AddOutgoingConnection)(void * handle,
-              const wchar_t *pOutgoingConnectionName,
+              void * pOutgoingConnectionName,
               struct IncomingConnectionInterface *pIncConnInt);
 
 struct PluginInterface
@@ -64,9 +64,13 @@ struct EngineInterface {
 
 void * GetPlugin();
 
-long __declspec(dllexport) PiPushAllRecords(void * handle, __int64 nRecordLimit);
+long PiPushAllRecords(void * handle, __int64 recordLimit);
+void PiClose(void * handle, bool hasErrors);
+long PiAddIncomingConnection(void * handle, void * connectionType, void * connectionName, struct IncomingConnectionInterface * incomingInterface);
+long PiAddOutgoingConnection(void * handle, void * connectionName, struct IncomingConnectionInterface * incomingInterface);
+long IiInit(void * handle, void * recordInfoIn);
 
-long AlteryxGoPlugin(int nToolID,
-	const wchar_t *pXmlProperties,
+long __declspec(dllexport) AlteryxGoPlugin(int nToolID,
+	void * pXmlProperties,
 	struct EngineInterface *pEngineInterface,
 	struct PluginInterface *r_pluginInterface);
