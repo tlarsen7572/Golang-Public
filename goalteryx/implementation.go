@@ -1,24 +1,27 @@
 package main
 
 type MyNewPlugin struct {
+	ToolId int
 }
 
-func (*MyNewPlugin) Init(toolId int, config string) bool {
+func (plugin *MyNewPlugin) Init(toolId int, config string) bool {
+	plugin.ToolId = toolId
+	OutputMessage(plugin.ToolId, 1, config)
 	return true
 }
 
-func (*MyNewPlugin) PushAllRecords(recordLimit int) int {
+func (plugin *MyNewPlugin) PushAllRecords(recordLimit int) int {
 	return 1
 }
 
-func (*MyNewPlugin) Close(hasErrors bool) {
+func (plugin *MyNewPlugin) Close(hasErrors bool) {
 
 }
 
-func (*MyNewPlugin) AddIncomingConnection(connectionType string, connectionName string) IncomingInterface {
+func (plugin *MyNewPlugin) AddIncomingConnection(connectionType string, connectionName string) IncomingInterface {
 	return nil
 }
 
-func (*MyNewPlugin) AddOutgoingConnection(connectionName string) bool {
+func (plugin *MyNewPlugin) AddOutgoingConnection(connectionName string) bool {
 	return true
 }

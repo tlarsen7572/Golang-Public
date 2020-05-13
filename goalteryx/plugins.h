@@ -49,20 +49,23 @@ struct PluginInterface
 
 typedef void AlteryxThreadProc(void *pData);
 struct PreSortConnectionInterface;
+typedef long ( _stdcall * OutputToolProgress)(void * handle, int nToolID, double dPercentProgress);
+typedef long ( _stdcall * OutputMessage)(void * handle, int nToolID, int nStatus, wchar_t *pMessage);
+
 struct EngineInterface {
-    const wchar_t (*CreateTempFileName)(const wchar_t *pExt);
-    const wchar_t (*CreateTempFileName2)(const wchar_t *pExt, int nOptions);
-    const wchar_t (*GetInitVar)(const wchar_t *pVar);
-    int (*IsLicensed)(const wchar_t *pDll, const wchar_t *pEntryPoint);
-    long (*OutputMessage)(int nToolID, int nStatus, const wchar_t *pMessage);
-    long (*OutputToolProgress)(int nToolID, double dPercentProgress);
-    long (*PreSort)(int nToolID, const wchar_t *pSortInfo, struct IncomingConnectionInterface *pOrigIncConnInt, struct IncomingConnectionInterface ** r_ppNewIncConnInt, struct PreSortConnectionInterface ** r_ppPreSortConnInt);
-    void (*QueueThread)(AlteryxThreadProc pProc, void *pData);
+    int sizeof_EngineInterface;
+
+    void * handle;
+
+    OutputToolProgress pOutputToolProgress;
+    OutputMessage pOutputMessage;
 };
 
 // For the glue
 
 void * GetPlugin();
+typedef long (*outputFunc)(int nToolID, int nStatus, void * pMessage);
+void callEngineOutputMessage(struct EngineInterface *pEngineInterface, int toolId, int status, void * message);
 
 long PiPushAllRecords(void * handle, __int64 recordLimit);
 void PiClose(void * handle, bool hasErrors);
