@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type MyNewPlugin struct {
 	ToolId int
 }
@@ -11,6 +13,7 @@ func (plugin *MyNewPlugin) Init(toolId int, config string) bool {
 }
 
 func (plugin *MyNewPlugin) PushAllRecords(recordLimit int) int {
+
 	return 1
 }
 
@@ -23,5 +26,6 @@ func (plugin *MyNewPlugin) AddIncomingConnection(connectionType string, connecti
 }
 
 func (plugin *MyNewPlugin) AddOutgoingConnection(connectionName string) bool {
+	OutputMessage(plugin.ToolId, 1, fmt.Sprintf(`%v`, connectionName))
 	return true
 }

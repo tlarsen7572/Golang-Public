@@ -7,7 +7,6 @@ import "C"
 import (
 	"fmt"
 	"github.com/mattn/go-pointer"
-	"github.com/vitaminwater/cgo.wchar"
 	"os"
 	"time"
 	"unsafe"
@@ -35,11 +34,7 @@ type IncomingInterface interface {
 //export AlteryxGoPlugin
 func AlteryxGoPlugin(toolId C.int, pXmlProperties unsafe.Pointer, pEngineInterface *C.struct_EngineInterface, r_pluginInterface *C.struct_PluginInterface) C.long {
 	Engine = pEngineInterface
-	config, err := wchar.WcharStringPtrToGoString(pXmlProperties)
-	if err != nil {
-		printLogf(`error converting pXmlProperties to string in AlteryxGoPlugin: %v`, err.Error())
-		return C.long(0)
-	}
+	config := cToString(pXmlProperties)
 	printLogf(`converted config in AlteryxGoPlugin: %v`, config)
 	MyPlugin = &MyNewPlugin{}
 	if !MyPlugin.Init(int(toolId), config) {
@@ -70,14 +65,8 @@ func PiClose(handle unsafe.Pointer, hasErrors C.bool) {
 //export PiAddIncomingConnection
 func PiAddIncomingConnection(handle unsafe.Pointer, connectionType unsafe.Pointer, connectionName unsafe.Pointer, incomingInterface *C.struct_IncomingConnectionInterface) C.long {
 	alteryxPlugin := pointer.Restore(handle).(Plugin)
-	goName, err := wchar.WcharStringPtrToGoString(connectionName)
-	if err != nil {
-		printLogf(`error converting connectionName to string in PiAddIncomingConnection: %v`, err.Error())
-	}
-	goType, err := wchar.WcharStringPtrToGoString(connectionType)
-	if err != nil {
-		printLogf(`error converting connectionType to string in PiAddIncomingConnection: %v`, err.Error())
-	}
+	goName := cToString(connectionName)
+	goType := cToString(connectionType)
 	goIncomingInterface := alteryxPlugin.AddIncomingConnection(goType, goName)
 	iiHandle := pointer.Save(goIncomingInterface)
 	incomingInterface.handle = iiHandle
@@ -88,10 +77,7 @@ func PiAddIncomingConnection(handle unsafe.Pointer, connectionType unsafe.Pointe
 //export PiAddOutgoingConnection
 func PiAddOutgoingConnection(handle unsafe.Pointer, connectionName unsafe.Pointer, incomingConnection *C.struct_IncomingConnectionInterface) C.long {
 	alteryxPlugin := pointer.Restore(handle).(Plugin)
-	goName, err := wchar.WcharStringPtrToGoString(connectionName)
-	if err != nil {
-		printLogf(`error converting connectionName to string in PiAddOutgoingConnection: %v`, err.Error())
-	}
+	goName := cToString(connectionName)
 	if alteryxPlugin.AddOutgoingConnection(goName) {
 		return C.long(1)
 	}
@@ -101,10 +87,7 @@ func PiAddOutgoingConnection(handle unsafe.Pointer, connectionName unsafe.Pointe
 //export IiInit
 func IiInit(handle unsafe.Pointer, recordInfoIn unsafe.Pointer) C.long {
 	incomingInterface := pointer.Restore(handle).(IncomingInterface)
-	goRecordInfoIn, err := wchar.WcharStringPtrToGoString(recordInfoIn)
-	if err != nil {
-		printLogf(`error converting recordInfoIn to string in IiInit: %v`, err.Error())
-	}
+	goRecordInfoIn := cToString(recordInfoIn)
 	if incomingInterface.Init(goRecordInfoIn) {
 		return C.long(1)
 	}
@@ -117,7 +100,7 @@ func GetPlugin() unsafe.Pointer {
 }
 
 func OutputMessage(toolId int, status int, message string) {
-	cMessage, err := wchar.FromGoString(message)
+	cMessage, err := stringToC(message)
 	if err != nil {
 		printLogf(`error converting message to wcharstring in OutputMessage: %v`, err.Error())
 		return
@@ -125,8 +108,9 @@ func OutputMessage(toolId int, status int, message string) {
 	if cMessage == nil {
 		return
 	}
-	printLogf(`getting ready to call output message`)
-	C.callEngineOutputMessage(Engine, C.int(toolId), C.int(status), unsafe.Pointer(&cMessage[0]))
+
+	printLogf(`getting ready to call output message with ` + message)
+	C.callEngineOutputMessage(Engine, C.int(toolId), C.int(status), cMessage)
 }
 
 func printLogf(message string, args ...interface{}) {
