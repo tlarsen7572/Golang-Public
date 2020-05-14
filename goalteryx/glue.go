@@ -21,7 +21,7 @@ var Engine *C.struct_EngineInterface
 
 type Plugin interface {
 	Init(toolId int, config string) bool
-	PushAllRecords(recordLimit int) int
+	PushAllRecords(recordLimit int) bool
 	Close(hasErrors bool)
 	AddIncomingConnection(connectionType string, connectionName string) IncomingInterface
 	AddOutgoingConnection(connectionName string) bool
@@ -29,6 +29,10 @@ type Plugin interface {
 
 type IncomingInterface interface {
 	Init(recordInfoIn string) bool
+	PushRecord(record unsafe.Pointer) bool
+	UpdateProgress(percent float64)
+	Close()
+	Free()
 }
 
 //export AlteryxGoPlugin
@@ -53,7 +57,10 @@ func AlteryxGoPlugin(toolId C.int, pXmlProperties unsafe.Pointer, pEngineInterfa
 //export PiPushAllRecords
 func PiPushAllRecords(handle unsafe.Pointer, recordLimit C.__int64) C.long {
 	alteryxPlugin := pointer.Restore(handle).(Plugin)
-	return C.long(alteryxPlugin.PushAllRecords(int(recordLimit)))
+	if alteryxPlugin.PushAllRecords(int(recordLimit)) {
+		return C.long(1)
+	}
+	return C.long(0)
 }
 
 //export PiClose
@@ -71,6 +78,10 @@ func PiAddIncomingConnection(handle unsafe.Pointer, connectionType unsafe.Pointe
 	iiHandle := pointer.Save(goIncomingInterface)
 	incomingInterface.handle = iiHandle
 	incomingInterface.pII_Init = C.T_II_Init(C.IiInit)
+	incomingInterface.pII_PushRecord = C.T_II_PushRecord(C.IiPushRecord)
+	incomingInterface.pII_UpdateProgress = C.T_II_UpdateProgress(C.IiUpdateProgress)
+	incomingInterface.pII_Close = C.T_II_Close(C.IiClose)
+	incomingInterface.pII_Free = C.T_II_Free(C.IiFree)
 	return C.long(1)
 }
 
@@ -92,6 +103,33 @@ func IiInit(handle unsafe.Pointer, recordInfoIn unsafe.Pointer) C.long {
 		return C.long(1)
 	}
 	return C.long(0)
+}
+
+//export IiPushRecord
+func IiPushRecord(handle unsafe.Pointer, record unsafe.Pointer) C.long {
+	incomingInterface := pointer.Restore(handle).(IncomingInterface)
+	if incomingInterface.PushRecord(record) {
+		return C.long(1)
+	}
+	return C.long(0)
+}
+
+//export IiUpdateProgress
+func IiUpdateProgress(handle unsafe.Pointer, percent C.double) {
+	incomingInterface := pointer.Restore(handle).(IncomingInterface)
+	incomingInterface.UpdateProgress(float64(percent))
+}
+
+//export IiClose
+func IiClose(handle unsafe.Pointer) {
+	incomingInterface := pointer.Restore(handle).(IncomingInterface)
+	incomingInterface.Close()
+}
+
+//export IiFree
+func IiFree(handle unsafe.Pointer) {
+	incomingInterface := pointer.Restore(handle).(IncomingInterface)
+	incomingInterface.Free()
 }
 
 //export GetPlugin

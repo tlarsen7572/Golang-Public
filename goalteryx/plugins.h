@@ -9,7 +9,7 @@ struct RecordData
 };
 
 typedef long ( _stdcall * T_II_Init)(void * handle, void * pXmlRecordMetaInfo);
-typedef long ( _stdcall * T_II_PushRecord)(void * handle, const struct RecordData * pRecord);
+typedef long ( _stdcall * T_II_PushRecord)(void * handle, void * pRecord);
 typedef void ( _stdcall * T_II_UpdateProgress)(void * handle, double dPercent);
 typedef void ( _stdcall * T_II_Close)(void * handle);
 typedef void ( _stdcall * T_II_Free)(void * handle);
@@ -72,6 +72,10 @@ void PiClose(void * handle, bool hasErrors);
 long PiAddIncomingConnection(void * handle, void * connectionType, void * connectionName, struct IncomingConnectionInterface * incomingInterface);
 long PiAddOutgoingConnection(void * handle, void * connectionName, struct IncomingConnectionInterface * incomingInterface);
 long IiInit(void * handle, void * recordInfoIn);
+long IiPushRecord(void * handle, void * record);
+void IiUpdateProgress(void * handle, double percent);
+void IiClose(void * handle);
+void IiFree(void * handle);
 
 long __declspec(dllexport) AlteryxGoPlugin(int nToolID,
 	void * pXmlProperties,
