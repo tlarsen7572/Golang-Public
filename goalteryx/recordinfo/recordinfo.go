@@ -101,11 +101,11 @@ func (info *recordInfo) AddInt64Field(name string, source string) string {
 }
 
 func (info *recordInfo) AddFixedDecimalField(name string, source string, size int, precision int) string {
-	return info.addField(name, source, size, precision, FixedDecimalType, uintptr(size)+2)
+	return info.addField(name, source, size, precision, FixedDecimalType, uintptr(size)+1)
 }
 
 func (info *recordInfo) AddFloatField(name string, source string) string {
-	return info.addField(name, source, 4, 0, FloatType, 4)
+	return info.addField(name, source, 4, 0, FloatType, 5)
 }
 
 func (info *recordInfo) AddDoubleField(name string, source string) string {
