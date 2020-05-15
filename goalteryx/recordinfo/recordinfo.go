@@ -32,6 +32,7 @@ type RecordInfo interface {
 	GetFixedDecimalValueFrom(fieldName string, record unsafe.Pointer) (float64, error)
 	GetFloatValueFrom(fieldName string, record unsafe.Pointer) (float32, error)
 	GetDoubleValueFrom(fieldName string, record unsafe.Pointer) (float64, error)
+	GetStringValueFrom(fieldName string, record unsafe.Pointer) (string, error)
 }
 
 type recordInfo struct {
@@ -139,51 +140,51 @@ func (info *recordInfo) AddDateTimeField(name string, source string) string {
 }
 
 func (info *recordInfo) GetByteValueFrom(fieldName string, record unsafe.Pointer) (byte, error) {
-	recordPtr, err := info.getFieldLocationPtr(fieldName, record)
+	offset, err := info.getFieldLocationOffset(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	return *((*byte)(unsafe.Pointer(recordPtr))), nil
+	return *((*byte)(unsafe.Pointer(uintptr(record) + offset))), nil
 }
 
 func (info *recordInfo) GetBoolValueFrom(fieldName string, record unsafe.Pointer) (bool, error) {
-	recordPtr, err := info.getFieldLocationPtr(fieldName, record)
+	offset, err := info.getFieldLocationOffset(fieldName)
 	if err != nil {
 		return false, err
 	}
-	return *((*bool)(unsafe.Pointer(recordPtr))), nil
+	return *((*bool)(unsafe.Pointer(uintptr(record) + offset))), nil
 }
 
 func (info *recordInfo) GetInt16ValueFrom(fieldName string, record unsafe.Pointer) (int16, error) {
-	recordPtr, err := info.getFieldLocationPtr(fieldName, record)
+	offset, err := info.getFieldLocationOffset(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	return *((*int16)(unsafe.Pointer(recordPtr))), nil
+	return *((*int16)(unsafe.Pointer(uintptr(record) + offset))), nil
 }
 
 func (info *recordInfo) GetInt32ValueFrom(fieldName string, record unsafe.Pointer) (int32, error) {
-	recordPtr, err := info.getFieldLocationPtr(fieldName, record)
+	offset, err := info.getFieldLocationOffset(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	return *((*int32)(unsafe.Pointer(recordPtr))), nil
+	return *((*int32)(unsafe.Pointer(uintptr(record) + offset))), nil
 }
 
 func (info *recordInfo) GetInt64ValueFrom(fieldName string, record unsafe.Pointer) (int64, error) {
-	recordPtr, err := info.getFieldLocationPtr(fieldName, record)
+	offset, err := info.getFieldLocationOffset(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	return *((*int64)(unsafe.Pointer(recordPtr))), nil
+	return *((*int64)(unsafe.Pointer(uintptr(record) + offset))), nil
 }
 
 func (info *recordInfo) GetFixedDecimalValueFrom(fieldName string, record unsafe.Pointer) (float64, error) {
-	fieldPtr, err := info.getFieldLocationPtr(fieldName, record)
+	offset, err := info.getFieldLocationOffset(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	valueStr := convert_strings.CToString(unsafe.Pointer(fieldPtr))
+	valueStr := convert_strings.CToString(unsafe.Pointer(uintptr(record) + offset))
 	value, err := strconv.ParseFloat(valueStr, 64)
 	if err != nil {
 		return 0, fmt.Errorf(`error converting '%v' to double in '%v' field`, value, fieldName)
@@ -192,19 +193,27 @@ func (info *recordInfo) GetFixedDecimalValueFrom(fieldName string, record unsafe
 }
 
 func (info *recordInfo) GetFloatValueFrom(fieldName string, record unsafe.Pointer) (float32, error) {
-	recordPtr, err := info.getFieldLocationPtr(fieldName, record)
+	offset, err := info.getFieldLocationOffset(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	return *((*float32)(unsafe.Pointer(recordPtr))), nil
+	return *((*float32)(unsafe.Pointer(uintptr(record) + offset))), nil
 }
 
 func (info *recordInfo) GetDoubleValueFrom(fieldName string, record unsafe.Pointer) (float64, error) {
-	recordPtr, err := info.getFieldLocationPtr(fieldName, record)
+	offset, err := info.getFieldLocationOffset(fieldName)
 	if err != nil {
 		return 0, err
 	}
-	return *((*float64)(unsafe.Pointer(recordPtr))), nil
+	return *((*float64)(unsafe.Pointer(uintptr(record) + offset))), nil
+}
+
+func (info *recordInfo) GetStringValueFrom(fieldName string, record unsafe.Pointer) (string, error) {
+	offset, err := info.getFieldLocationOffset(fieldName)
+	if err != nil {
+		return ``, err
+	}
+	return convert_strings.CToString(unsafe.Pointer(uintptr(record) + offset)), nil
 }
 
 func (info *recordInfo) addField(name string, source string, size int, scale int, fieldType string, fixedLen uintptr, nullByteLen uintptr) string {
@@ -225,13 +234,13 @@ func (info *recordInfo) addField(name string, source string, size int, scale int
 	return actualName
 }
 
-func (info *recordInfo) getFieldLocationPtr(fieldName string, record unsafe.Pointer) (uintptr, error) {
+func (info *recordInfo) getFieldLocationOffset(fieldName string) (uintptr, error) {
 	index, ok := info.fieldNames[fieldName]
 	if !ok {
 		return 0, fmt.Errorf(`field '%v' does not exist`, fieldName)
 	}
 	field := info.fields[index]
-	return uintptr(record) + field.location, nil
+	return field.location, nil
 }
 
 func (info *recordInfo) checkFieldName(name string) string {

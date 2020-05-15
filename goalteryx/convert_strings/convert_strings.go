@@ -20,10 +20,10 @@ func CToString(char unsafe.Pointer) string {
 		return ``
 	}
 
-	wcharPtr := uintptr(char)
+	offset := uintptr(0)
 	ws := make([]byte, 0)
 	for {
-		w := *((*byte)(unsafe.Pointer(wcharPtr)))
+		w := *((*byte)(unsafe.Pointer(uintptr(char) + offset)))
 
 		// check if the current wchar is nil and also the first wchar in a UTF-16 sequence.  If yes, we
 		// have reached the end of the string
@@ -32,7 +32,7 @@ func CToString(char unsafe.Pointer) string {
 		}
 		ws = append(ws, w)
 
-		wcharPtr += 1
+		offset++
 	}
 	return string(ws)
 }
@@ -42,11 +42,11 @@ func WideCToString(wchar_t unsafe.Pointer) string {
 		return ``
 	}
 
-	wcharPtr := uintptr(wchar_t)
+	offset := uintptr(0)
 	ws := make([]uint16, 0)
 	index := 1
 	for {
-		w := *((*uint16)(unsafe.Pointer(wcharPtr)))
+		w := *((*uint16)(unsafe.Pointer(uintptr(wchar_t) + offset)))
 
 		// check if the current wchar is nil and also the first wchar in a UTF-16 sequence.  If yes, we
 		// have reached the end of the string
@@ -55,8 +55,8 @@ func WideCToString(wchar_t unsafe.Pointer) string {
 		}
 		ws = append(ws, w)
 
-		wcharPtr += 2
-		index += 1
+		offset += 2
+		index++
 	}
 	return syscall.UTF16ToString(ws)
 }

@@ -155,5 +155,5 @@ func OutputMessage(toolId int, status int, message string) {
 func printLogf(message string, args ...interface{}) {
 	file, _ := os.OpenFile("C:\\temp\\output.txt", os.O_WRONLY|os.O_APPEND, 0644)
 	defer file.Close()
-	file.WriteString(fmt.Sprintf(time.Now().String()+": "+message+"\n", args...))
+	_, _ = file.WriteString(fmt.Sprintf(time.Now().String()+": "+message+"\n", args...))
 }

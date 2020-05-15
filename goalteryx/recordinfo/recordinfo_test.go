@@ -198,3 +198,18 @@ func TestCorrectlyRetrieveDoubleValue(t *testing.T) {
 		t.Fatalf(`expected 0.12345 but got %v`, value)
 	}
 }
+
+func TestCorrectlyRetrieveStringValue(t *testing.T) {
+	recordInfo, err := recordinfo.FromXml(recordInfoXml)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	value, err := recordInfo.GetStringValueFrom(`StringField`, sampleRecord)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	if value != `A` {
+		t.Fatalf(`expected 'A' but got '%v'`, value)
+	}
+}
