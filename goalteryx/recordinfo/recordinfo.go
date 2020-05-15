@@ -2,8 +2,7 @@ package recordinfo
 
 import (
 	"fmt"
-	"github.com/tlarsen7572/Golang-Public/goalteryx/convert_strings"
-	"strconv"
+	"time"
 	"unsafe"
 )
 
@@ -24,15 +23,19 @@ type RecordInfo interface {
 	AddV_WStringField(name string, source string, size int) string
 	AddDateField(name string, source string) string
 	AddDateTimeField(name string, source string) string
-	GetByteValueFrom(fieldName string, record unsafe.Pointer) (byte, error)
-	GetBoolValueFrom(fieldName string, record unsafe.Pointer) (bool, error)
-	GetInt16ValueFrom(fieldName string, record unsafe.Pointer) (int16, error)
-	GetInt32ValueFrom(fieldName string, record unsafe.Pointer) (int32, error)
-	GetInt64ValueFrom(fieldName string, record unsafe.Pointer) (int64, error)
-	GetFixedDecimalValueFrom(fieldName string, record unsafe.Pointer) (float64, error)
-	GetFloatValueFrom(fieldName string, record unsafe.Pointer) (float32, error)
-	GetDoubleValueFrom(fieldName string, record unsafe.Pointer) (float64, error)
-	GetStringValueFrom(fieldName string, record unsafe.Pointer) (string, error)
+
+	GetByteValueFrom(fieldName string, record unsafe.Pointer) (value byte, isNull bool, err error)
+	GetBoolValueFrom(fieldName string, record unsafe.Pointer) (value bool, isNull bool, err error)
+	GetInt16ValueFrom(fieldName string, record unsafe.Pointer) (value int16, isNull bool, err error)
+	GetInt32ValueFrom(fieldName string, record unsafe.Pointer) (value int32, isNull bool, err error)
+	GetInt64ValueFrom(fieldName string, record unsafe.Pointer) (value int64, isNull bool, err error)
+	GetFixedDecimalValueFrom(fieldName string, record unsafe.Pointer) (value float64, isNull bool, err error)
+	GetFloatValueFrom(fieldName string, record unsafe.Pointer) (value float32, isNull bool, err error)
+	GetDoubleValueFrom(fieldName string, record unsafe.Pointer) (value float64, isNull bool, err error)
+	GetStringValueFrom(fieldName string, record unsafe.Pointer) (value string, isNull bool, err error)
+	GetWStringValueFrom(fieldName string, record unsafe.Pointer) (value string, isNull bool, err error)
+	GetDateValueFrom(fieldName string, record unsafe.Pointer) (value time.Time, isNull bool, err error)
+	GetDateTimeValueFrom(fieldName string, record unsafe.Pointer) (value time.Time, isNull bool, err error)
 }
 
 type recordInfo struct {
@@ -41,21 +44,6 @@ type recordInfo struct {
 	fields     []FieldInfo
 	fieldNames map[string]int
 }
-
-var ByteType = `byte`
-var BoolType = `bool`
-var Int16Type = `int16`
-var Int32Type = `int32`
-var Int64Type = `int64`
-var FixedDecimalType = `fixeddecimal`
-var FloatType = `float`
-var DoubleType = `double`
-var StringType = `string`
-var WStringType = `wstring`
-var V_StringType = `v_string`
-var V_WStringType = `v_wstring`
-var DateType = `date`
-var DateTimeType = `datetime`
 
 type FieldInfo struct {
 	Name        string
@@ -83,164 +71,13 @@ func (info *recordInfo) GetFieldByIndex(index int) (FieldInfo, error) {
 	return info.fields[index], nil
 }
 
-func (info *recordInfo) AddByteField(name string, source string) string {
-	return info.addField(name, source, 1, 0, ByteType, 1, 1)
-}
-
-func (info *recordInfo) AddBoolField(name string, source string) string {
-	return info.addField(name, source, 1, 0, BoolType, 1, 0)
-}
-
-func (info *recordInfo) AddInt16Field(name string, source string) string {
-	return info.addField(name, source, 2, 0, Int16Type, 2, 1)
-}
-
-func (info *recordInfo) AddInt32Field(name string, source string) string {
-	return info.addField(name, source, 4, 0, Int32Type, 4, 1)
-}
-
-func (info *recordInfo) AddInt64Field(name string, source string) string {
-	return info.addField(name, source, 8, 0, Int64Type, 8, 1)
-}
-
-func (info *recordInfo) AddFixedDecimalField(name string, source string, size int, precision int) string {
-	return info.addField(name, source, size, precision, FixedDecimalType, uintptr(size), 1)
-}
-
-func (info *recordInfo) AddFloatField(name string, source string) string {
-	return info.addField(name, source, 4, 0, FloatType, 4, 1)
-}
-
-func (info *recordInfo) AddDoubleField(name string, source string) string {
-	return info.addField(name, source, 8, 0, DoubleType, 8, 1)
-}
-
-func (info *recordInfo) AddStringField(name string, source string, size int) string {
-	return info.addField(name, source, size, 0, StringType, uintptr(size), 1)
-}
-
-func (info *recordInfo) AddWStringField(name string, source string, size int) string {
-	return info.addField(name, source, size, 0, WStringType, uintptr(size), 1)
-}
-
-func (info *recordInfo) AddV_StringField(name string, source string, size int) string {
-	return info.addField(name, source, size, 0, V_StringType, 4, 0)
-}
-
-func (info *recordInfo) AddV_WStringField(name string, source string, size int) string {
-	return info.addField(name, source, size, 0, V_WStringType, 4, 0)
-}
-
-func (info *recordInfo) AddDateField(name string, source string) string {
-	return info.addField(name, source, 10, 0, DateType, 10, 1)
-}
-
-func (info *recordInfo) AddDateTimeField(name string, source string) string {
-	return info.addField(name, source, 19, 0, DateTimeType, 19, 1)
-}
-
-func (info *recordInfo) GetByteValueFrom(fieldName string, record unsafe.Pointer) (byte, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return 0, err
-	}
-	return *((*byte)(unsafe.Pointer(uintptr(record) + offset))), nil
-}
-
-func (info *recordInfo) GetBoolValueFrom(fieldName string, record unsafe.Pointer) (bool, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return false, err
-	}
-	return *((*bool)(unsafe.Pointer(uintptr(record) + offset))), nil
-}
-
-func (info *recordInfo) GetInt16ValueFrom(fieldName string, record unsafe.Pointer) (int16, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return 0, err
-	}
-	return *((*int16)(unsafe.Pointer(uintptr(record) + offset))), nil
-}
-
-func (info *recordInfo) GetInt32ValueFrom(fieldName string, record unsafe.Pointer) (int32, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return 0, err
-	}
-	return *((*int32)(unsafe.Pointer(uintptr(record) + offset))), nil
-}
-
-func (info *recordInfo) GetInt64ValueFrom(fieldName string, record unsafe.Pointer) (int64, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return 0, err
-	}
-	return *((*int64)(unsafe.Pointer(uintptr(record) + offset))), nil
-}
-
-func (info *recordInfo) GetFixedDecimalValueFrom(fieldName string, record unsafe.Pointer) (float64, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return 0, err
-	}
-	valueStr := convert_strings.CToString(unsafe.Pointer(uintptr(record) + offset))
-	value, err := strconv.ParseFloat(valueStr, 64)
-	if err != nil {
-		return 0, fmt.Errorf(`error converting '%v' to double in '%v' field`, value, fieldName)
-	}
-	return value, nil
-}
-
-func (info *recordInfo) GetFloatValueFrom(fieldName string, record unsafe.Pointer) (float32, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return 0, err
-	}
-	return *((*float32)(unsafe.Pointer(uintptr(record) + offset))), nil
-}
-
-func (info *recordInfo) GetDoubleValueFrom(fieldName string, record unsafe.Pointer) (float64, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return 0, err
-	}
-	return *((*float64)(unsafe.Pointer(uintptr(record) + offset))), nil
-}
-
-func (info *recordInfo) GetStringValueFrom(fieldName string, record unsafe.Pointer) (string, error) {
-	offset, err := info.getFieldLocationOffset(fieldName)
-	if err != nil {
-		return ``, err
-	}
-	return convert_strings.CToString(unsafe.Pointer(uintptr(record) + offset)), nil
-}
-
-func (info *recordInfo) addField(name string, source string, size int, scale int, fieldType string, fixedLen uintptr, nullByteLen uintptr) string {
-	actualName := info.checkFieldName(name)
-	info.fields = append(info.fields, FieldInfo{
-		Name:        actualName,
-		Source:      source,
-		Size:        size,
-		Precision:   scale,
-		Type:        fieldType,
-		location:    info.currentLen,
-		fixedLen:    fixedLen,
-		nullByteLen: nullByteLen,
-	})
-	info.fieldNames[actualName] = info.numFields
-	info.numFields++
-	info.currentLen += fixedLen + nullByteLen
-	return actualName
-}
-
-func (info *recordInfo) getFieldLocationOffset(fieldName string) (uintptr, error) {
+func (info *recordInfo) getFieldInfo(fieldName string) (FieldInfo, error) {
 	index, ok := info.fieldNames[fieldName]
 	if !ok {
-		return 0, fmt.Errorf(`field '%v' does not exist`, fieldName)
+		return FieldInfo{}, fmt.Errorf(`field '%v' does not exist`, fieldName)
 	}
 	field := info.fields[index]
-	return field.location, nil
+	return field, nil
 }
 
 func (info *recordInfo) checkFieldName(name string) string {
