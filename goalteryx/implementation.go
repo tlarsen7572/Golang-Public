@@ -45,7 +45,7 @@ func (ii *MyNewIncomingInterface) Init(recordInfoIn string) bool {
 func (ii *MyNewIncomingInterface) PushRecord(record unsafe.Pointer) bool {
 	ptr := uintptr(record)
 	recordBytes := make([]byte, 0)
-	for index := 0; index < 82; index++ {
+	for index := 0; index < 1850; index++ {
 		singleByte := *((*byte)(unsafe.Pointer(ptr)))
 		recordBytes = append(recordBytes, singleByte)
 		ptr += 1

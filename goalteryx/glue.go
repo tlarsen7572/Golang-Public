@@ -7,6 +7,7 @@ import "C"
 import (
 	"fmt"
 	"github.com/mattn/go-pointer"
+	"github.com/tlarsen7572/Golang-Public/goalteryx/convert_strings"
 	"os"
 	"time"
 	"unsafe"
@@ -38,7 +39,7 @@ type IncomingInterface interface {
 //export AlteryxGoPlugin
 func AlteryxGoPlugin(toolId C.int, pXmlProperties unsafe.Pointer, pEngineInterface *C.struct_EngineInterface, r_pluginInterface *C.struct_PluginInterface) C.long {
 	Engine = pEngineInterface
-	config := cToString(pXmlProperties)
+	config := convert_strings.WideCToString(pXmlProperties)
 	printLogf(`converted config in AlteryxGoPlugin: %v`, config)
 	MyPlugin = &MyNewPlugin{}
 	if !MyPlugin.Init(int(toolId), config) {
@@ -72,8 +73,8 @@ func PiClose(handle unsafe.Pointer, hasErrors C.bool) {
 //export PiAddIncomingConnection
 func PiAddIncomingConnection(handle unsafe.Pointer, connectionType unsafe.Pointer, connectionName unsafe.Pointer, incomingInterface *C.struct_IncomingConnectionInterface) C.long {
 	alteryxPlugin := pointer.Restore(handle).(Plugin)
-	goName := cToString(connectionName)
-	goType := cToString(connectionType)
+	goName := convert_strings.WideCToString(connectionName)
+	goType := convert_strings.WideCToString(connectionType)
 	goIncomingInterface := alteryxPlugin.AddIncomingConnection(goType, goName)
 	iiHandle := pointer.Save(goIncomingInterface)
 	incomingInterface.handle = iiHandle
@@ -88,7 +89,7 @@ func PiAddIncomingConnection(handle unsafe.Pointer, connectionType unsafe.Pointe
 //export PiAddOutgoingConnection
 func PiAddOutgoingConnection(handle unsafe.Pointer, connectionName unsafe.Pointer, incomingConnection *C.struct_IncomingConnectionInterface) C.long {
 	alteryxPlugin := pointer.Restore(handle).(Plugin)
-	goName := cToString(connectionName)
+	goName := convert_strings.WideCToString(connectionName)
 	if alteryxPlugin.AddOutgoingConnection(goName) {
 		return C.long(1)
 	}
@@ -98,7 +99,7 @@ func PiAddOutgoingConnection(handle unsafe.Pointer, connectionName unsafe.Pointe
 //export IiInit
 func IiInit(handle unsafe.Pointer, recordInfoIn unsafe.Pointer) C.long {
 	incomingInterface := pointer.Restore(handle).(IncomingInterface)
-	goRecordInfoIn := cToString(recordInfoIn)
+	goRecordInfoIn := convert_strings.WideCToString(recordInfoIn)
 	if incomingInterface.Init(goRecordInfoIn) {
 		return C.long(1)
 	}
@@ -138,7 +139,7 @@ func GetPlugin() unsafe.Pointer {
 }
 
 func OutputMessage(toolId int, status int, message string) {
-	cMessage, err := stringToC(message)
+	cMessage, err := convert_strings.StringToWideC(message)
 	if err != nil {
 		printLogf(`error converting message to wcharstring in OutputMessage: %v`, err.Error())
 		return
