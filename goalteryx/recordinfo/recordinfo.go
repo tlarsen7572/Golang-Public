@@ -36,6 +36,7 @@ type RecordInfo interface {
 	GetWStringValueFrom(fieldName string, record unsafe.Pointer) (value string, isNull bool, err error)
 	GetDateValueFrom(fieldName string, record unsafe.Pointer) (value time.Time, isNull bool, err error)
 	GetDateTimeValueFrom(fieldName string, record unsafe.Pointer) (value time.Time, isNull bool, err error)
+	GetInterfaceValueFrom(fieldName string, record unsafe.Pointer) (value interface{}, isNull bool, err error)
 
 	SetByteField(fieldName string, value byte) error
 	SetBoolField(fieldName string, value bool) error

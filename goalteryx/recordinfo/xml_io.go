@@ -8,7 +8,6 @@ import (
 )
 
 type xmlMetaInfo struct {
-	ToolId string      `xml:"MetaInfo"`
 	Fields []*xmlField `xml:"RecordInfo>Field"`
 }
 

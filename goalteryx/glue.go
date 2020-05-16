@@ -40,7 +40,6 @@ type IncomingInterface interface {
 func AlteryxGoPlugin(toolId C.int, pXmlProperties unsafe.Pointer, pEngineInterface *C.struct_EngineInterface, r_pluginInterface *C.struct_PluginInterface) C.long {
 	Engine = pEngineInterface
 	config := convert_strings.WideCToString(pXmlProperties)
-	printLogf(`converted config in AlteryxGoPlugin: %v`, config)
 	MyPlugin = &MyNewPlugin{}
 	if !MyPlugin.Init(int(toolId), config) {
 		return C.long(0)
@@ -51,7 +50,6 @@ func AlteryxGoPlugin(toolId C.int, pXmlProperties unsafe.Pointer, pEngineInterfa
 	r_pluginInterface.pPI_Close = C.T_PI_Close(C.PiClose)
 	r_pluginInterface.pPI_AddIncomingConnection = C.T_PI_AddIncomingConnection(C.PiAddIncomingConnection)
 	r_pluginInterface.pPI_AddOutgoingConnection = C.T_PI_AddOutgoingConnection(C.PiAddOutgoingConnection)
-	printLogf(`hooked up PluginInterface`)
 	return C.long(1)
 }
 
@@ -141,14 +139,12 @@ func GetPlugin() unsafe.Pointer {
 func OutputMessage(toolId int, status int, message string) {
 	cMessage, err := convert_strings.StringToWideC(message)
 	if err != nil {
-		printLogf(`error converting message to wcharstring in OutputMessage: %v`, err.Error())
 		return
 	}
 	if cMessage == nil {
 		return
 	}
 
-	printLogf(`getting ready to call output message with ` + message)
 	C.callEngineOutputMessage(Engine, C.int(toolId), C.int(status), cMessage)
 }
 

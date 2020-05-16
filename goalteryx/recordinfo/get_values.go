@@ -119,6 +119,41 @@ func (info *recordInfo) GetDateTimeValueFrom(fieldName string, record unsafe.Poi
 	return date, false, nil
 }
 
+func (info *recordInfo) GetInterfaceValueFrom(fieldName string, record unsafe.Pointer) (value interface{}, isNull bool, err error) {
+	returnEarly, isNull, err, field := info.shouldReturnEarlyWith(fieldName, record)
+	if returnEarly {
+		return nil, isNull, err
+	}
+	switch field.Type {
+	case ByteType:
+		return info.GetByteValueFrom(fieldName, record)
+	case BoolType:
+		return info.GetBoolValueFrom(fieldName, record)
+	case Int16Type:
+		return info.GetInt16ValueFrom(fieldName, record)
+	case Int32Type:
+		return info.GetInt32ValueFrom(fieldName, record)
+	case Int64Type:
+		return info.GetInt64ValueFrom(fieldName, record)
+	case FixedDecimalType:
+		return info.GetFixedDecimalValueFrom(fieldName, record)
+	case FloatType:
+		return info.GetFloatValueFrom(fieldName, record)
+	case DoubleType:
+		return info.GetDoubleValueFrom(fieldName, record)
+	case StringType:
+		return info.GetStringValueFrom(fieldName, record)
+	case WStringType:
+		return info.GetWStringValueFrom(fieldName, record)
+	case DateType:
+		return info.GetDateValueFrom(fieldName, record)
+	case DateTimeType:
+		return info.GetDateTimeValueFrom(fieldName, record)
+	default:
+		return nil, false, fmt.Errorf(`field [%v] has invalid type '%v'`, field.Name, field.Type)
+	}
+}
+
 func (info *recordInfo) shouldReturnEarlyWith(fieldName string, record unsafe.Pointer) (returnEarly bool, isNull bool, err error, field *fieldInfoEditor) {
 	field, err = info.getFieldInfo(fieldName)
 	if err != nil {

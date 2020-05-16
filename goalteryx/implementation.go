@@ -1,18 +1,31 @@
 package main
 
 import (
-	"encoding/binary"
+	"encoding/xml"
 	"fmt"
+	"github.com/tlarsen7572/Golang-Public/goalteryx/recordinfo"
 	"unsafe"
 )
 
 type MyNewPlugin struct {
 	ToolId int
+	Field  string
+}
+
+type ConfigXml struct {
+	Field string `xml:"Field"`
 }
 
 func (plugin *MyNewPlugin) Init(toolId int, config string) bool {
 	plugin.ToolId = toolId
 	OutputMessage(plugin.ToolId, 1, fmt.Sprintf(`Tool configuration: %v`, config))
+	var c ConfigXml
+	err := xml.Unmarshal([]byte(config), &c)
+	if err != nil {
+		OutputMessage(toolId, 3, err.Error())
+		return false
+	}
+	plugin.Field = c.Field
 	return true
 }
 
@@ -35,23 +48,34 @@ func (plugin *MyNewPlugin) AddOutgoingConnection(connectionName string) bool {
 
 type MyNewIncomingInterface struct {
 	Parent *MyNewPlugin
+	inInfo recordinfo.RecordInfo
 }
 
 func (ii *MyNewIncomingInterface) Init(recordInfoIn string) bool {
+	var err error
+	ii.inInfo, err = recordinfo.FromXml(recordInfoIn)
+	if err != nil {
+		OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
+	}
 	OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`Incoming record info: %v`, recordInfoIn))
 	return true
 }
 
 func (ii *MyNewIncomingInterface) PushRecord(record unsafe.Pointer) bool {
-	ptr := uintptr(record)
-	recordBytes := make([]byte, 0)
-	for index := 0; index < 1850; index++ {
-		singleByte := *((*byte)(unsafe.Pointer(ptr)))
-		recordBytes = append(recordBytes, singleByte)
-		ptr += 1
+	var value interface{}
+	var isNull bool
+	var err error
+	value, isNull, err = ii.inInfo.GetInterfaceValueFrom(ii.Parent.Field, record)
+	if err != nil {
+		OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
 	}
-	OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`Record bytes: %v`, recordBytes))
-	OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`First field: %v`, binary.LittleEndian.Uint64(recordBytes[0:8])))
+	if isNull {
+		OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`[%v] is null`, ii.Parent.Field))
+	} else {
+		OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`[%v] is %v`, ii.Parent.Field, value))
+	}
 	return true
 }
 
