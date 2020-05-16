@@ -99,7 +99,7 @@ func (info *recordInfo) GetDateValueFrom(fieldName string, record unsafe.Pointer
 		return zeroDate, isNull, err
 	}
 	dateStr := convert_strings.CToString(unsafe.Pointer(uintptr(record) + field.location))
-	date, err := time.Parse(`2006-01-02`, dateStr)
+	date, err := time.Parse(dateFormat, dateStr)
 	if err != nil {
 		return zeroDate, false, fmt.Errorf(`error converting date '%v' in GetDateValueFrom for field [%v], use format yyyy-MM-dd`, dateStr, fieldName)
 	}
@@ -112,7 +112,7 @@ func (info *recordInfo) GetDateTimeValueFrom(fieldName string, record unsafe.Poi
 		return zeroDate, isNull, err
 	}
 	dateStr := convert_strings.CToString(unsafe.Pointer(uintptr(record) + field.location))
-	date, err := time.Parse(`2006-01-02 15:04:05`, dateStr)
+	date, err := time.Parse(dateTimeFormat, dateStr)
 	if err != nil {
 		return zeroDate, false, fmt.Errorf(`error converting datetime '%v' in GetDateValueFrom for field [%v], use format yyyy-MM-dd hh:mm:ss`, dateStr, fieldName)
 	}

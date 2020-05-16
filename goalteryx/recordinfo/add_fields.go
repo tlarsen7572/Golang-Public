@@ -13,31 +13,31 @@ func (info *recordInfo) AddInt16Field(name string, source string) string {
 }
 
 func (info *recordInfo) AddInt32Field(name string, source string) string {
-	return info.addField(name, source, 4, 0, Int32Type, 4, 1, nil)
+	return info.addField(name, source, 4, 0, Int32Type, 4, 1, generateInt32)
 }
 
 func (info *recordInfo) AddInt64Field(name string, source string) string {
-	return info.addField(name, source, 8, 0, Int64Type, 8, 1, nil)
+	return info.addField(name, source, 8, 0, Int64Type, 8, 1, generateInt64)
 }
 
 func (info *recordInfo) AddFixedDecimalField(name string, source string, size int, precision int) string {
-	return info.addField(name, source, size, precision, FixedDecimalType, uintptr(size), 1, nil)
+	return info.addField(name, source, size, precision, FixedDecimalType, uintptr(size), 1, generateFixedDecimal)
 }
 
 func (info *recordInfo) AddFloatField(name string, source string) string {
-	return info.addField(name, source, 4, 0, FloatType, 4, 1, nil)
+	return info.addField(name, source, 4, 0, FloatType, 4, 1, generateFloat32)
 }
 
 func (info *recordInfo) AddDoubleField(name string, source string) string {
-	return info.addField(name, source, 8, 0, DoubleType, 8, 1, nil)
+	return info.addField(name, source, 8, 0, DoubleType, 8, 1, generateFloat64)
 }
 
 func (info *recordInfo) AddStringField(name string, source string, size int) string {
-	return info.addField(name, source, size, 0, StringType, uintptr(size), 1, nil)
+	return info.addField(name, source, size, 0, StringType, uintptr(size), 1, generateString)
 }
 
 func (info *recordInfo) AddWStringField(name string, source string, size int) string {
-	return info.addField(name, source, size, 0, WStringType, uintptr(size)*2, 1, nil)
+	return info.addField(name, source, size, 0, WStringType, uintptr(size)*2, 1, generateWString)
 }
 
 func (info *recordInfo) AddV_StringField(name string, source string, size int) string {
@@ -49,11 +49,11 @@ func (info *recordInfo) AddV_WStringField(name string, source string, size int) 
 }
 
 func (info *recordInfo) AddDateField(name string, source string) string {
-	return info.addField(name, source, 10, 0, DateType, 10, 1, nil)
+	return info.addField(name, source, 10, 0, DateType, 10, 1, generateDate)
 }
 
 func (info *recordInfo) AddDateTimeField(name string, source string) string {
-	return info.addField(name, source, 19, 0, DateTimeType, 19, 1, nil)
+	return info.addField(name, source, 19, 0, DateTimeType, 19, 1, generateDateTime)
 }
 
 func (info *recordInfo) addField(name string, source string, size int, scale int, fieldType string, fixedLen uintptr, nullByteLen uintptr, generator generateBytes) string {

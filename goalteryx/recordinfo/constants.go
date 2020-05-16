@@ -20,3 +20,6 @@ var DateTimeType = `datetime`
 var zeroDate = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
 
 type generateBytes func(field *fieldInfoEditor) ([]byte, error)
+
+var dateFormat = `2006-01-02`
+var dateTimeFormat = `2006-01-02 15:04:05`
