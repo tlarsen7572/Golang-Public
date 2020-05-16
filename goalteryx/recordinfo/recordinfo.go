@@ -36,16 +36,40 @@ type RecordInfo interface {
 	GetWStringValueFrom(fieldName string, record unsafe.Pointer) (value string, isNull bool, err error)
 	GetDateValueFrom(fieldName string, record unsafe.Pointer) (value time.Time, isNull bool, err error)
 	GetDateTimeValueFrom(fieldName string, record unsafe.Pointer) (value time.Time, isNull bool, err error)
+
+	SetByteField(fieldName string, value byte) error
+	SetBoolField(fieldName string, value bool) error
+	SetInt16Field(fieldName string, value int16) error
+	SetInt32Field(fieldName string, value int32) error
+	SetInt64Field(fieldName string, value int64) error
+	SetFixedDecimalField(fieldName string, value float64) error
+	SetFloatField(fieldName string, value float32) error
+	SetDoubleField(fieldName string, value float64) error
+	SetStringField(fieldName string, value string) error
+	SetWStringField(fieldName string, value string) error
+	SetDateField(fieldName string, value time.Time) error
+	SetDateTimeField(fieldName string, value time.Time) error
+	SetFieldNull(fieldName string) error
+
+	GenerateRecord() (unsafe.Pointer, error)
 }
 
 type recordInfo struct {
 	currentLen uintptr
 	numFields  int
-	fields     []FieldInfo
+	fields     []*fieldInfoEditor
 	fieldNames map[string]int
 }
 
 type FieldInfo struct {
+	Name      string
+	Source    string
+	Size      int
+	Precision int
+	Type      string
+}
+
+type fieldInfoEditor struct {
 	Name        string
 	Source      string
 	Size        int
@@ -54,6 +78,8 @@ type FieldInfo struct {
 	location    uintptr
 	fixedLen    uintptr
 	nullByteLen uintptr
+	value       interface{}
+	generator   generateBytes
 }
 
 func New() RecordInfo {
@@ -68,16 +94,22 @@ func (info *recordInfo) GetFieldByIndex(index int) (FieldInfo, error) {
 	if count := len(info.fields); index < 0 || index >= count {
 		return FieldInfo{}, fmt.Errorf(`index was not between 0 and %v`, count)
 	}
-	return info.fields[index], nil
+	field := info.fields[index]
+	return FieldInfo{
+		Name:      field.Name,
+		Source:    field.Source,
+		Size:      field.Size,
+		Precision: field.Precision,
+		Type:      field.Type,
+	}, nil
 }
 
-func (info *recordInfo) getFieldInfo(fieldName string) (FieldInfo, error) {
+func (info *recordInfo) getFieldInfo(fieldName string) (*fieldInfoEditor, error) {
 	index, ok := info.fieldNames[fieldName]
 	if !ok {
-		return FieldInfo{}, fmt.Errorf(`field '%v' does not exist`, fieldName)
+		return nil, fmt.Errorf(`field '%v' does not exist`, fieldName)
 	}
-	field := info.fields[index]
-	return field, nil
+	return info.fields[index], nil
 }
 
 func (info *recordInfo) checkFieldName(name string) string {

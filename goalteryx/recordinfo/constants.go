@@ -18,3 +18,5 @@ var DateType = `date`
 var DateTimeType = `datetime`
 
 var zeroDate = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
+
+type generateBytes func(field *fieldInfoEditor) ([]byte, error)

@@ -119,10 +119,10 @@ func (info *recordInfo) GetDateTimeValueFrom(fieldName string, record unsafe.Poi
 	return date, false, nil
 }
 
-func (info *recordInfo) shouldReturnEarlyWith(fieldName string, record unsafe.Pointer) (returnEarly bool, isNull bool, err error, field FieldInfo) {
+func (info *recordInfo) shouldReturnEarlyWith(fieldName string, record unsafe.Pointer) (returnEarly bool, isNull bool, err error, field *fieldInfoEditor) {
 	field, err = info.getFieldInfo(fieldName)
 	if err != nil {
-		return true, false, err, FieldInfo{}
+		return true, false, err, nil
 	}
 	if isValueNull(field, record) {
 		return true, true, nil, field
@@ -144,7 +144,7 @@ var nullByteTypes = []string{
 	DateTimeType,
 }
 
-func isValueNull(field FieldInfo, record unsafe.Pointer) bool {
+func isValueNull(field *fieldInfoEditor, record unsafe.Pointer) bool {
 	for _, nullByteType := range nullByteTypes {
 		if nullByteType == field.Type {
 			nullByte := *((*byte)(unsafe.Pointer(uintptr(record) + field.location + field.fixedLen)))
