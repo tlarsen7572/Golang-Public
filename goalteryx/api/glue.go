@@ -1,4 +1,4 @@
-package main
+package api
 
 /*
 #include "plugins.h"
@@ -13,11 +13,6 @@ import (
 	"unsafe"
 )
 
-func main() {
-
-}
-
-var MyPlugin Plugin
 var Engine *C.struct_EngineInterface
 
 type Plugin interface {
@@ -36,21 +31,20 @@ type IncomingInterface interface {
 	Free()
 }
 
-//export AlteryxGoPlugin
-func AlteryxGoPlugin(toolId C.int, pXmlProperties unsafe.Pointer, pEngineInterface *C.struct_EngineInterface, r_pluginInterface *C.struct_PluginInterface) C.long {
-	Engine = pEngineInterface
+func ConfigurePlugin(plugin Plugin, toolId int, pXmlProperties unsafe.Pointer, pEngineInterface unsafe.Pointer, r_pluginInterface unsafe.Pointer) int {
 	config := convert_strings.WideCToString(pXmlProperties)
-	MyPlugin = &MyNewPlugin{}
-	if !MyPlugin.Init(int(toolId), config) {
-		return C.long(0)
+	Engine = (*C.struct_EngineInterface)(pEngineInterface)
+	if !plugin.Init(toolId, config) {
+		return 0
 	}
 
-	r_pluginInterface.handle = GetPlugin()
-	r_pluginInterface.pPI_PushAllRecords = C.T_PI_PushAllRecords(C.PiPushAllRecords)
-	r_pluginInterface.pPI_Close = C.T_PI_Close(C.PiClose)
-	r_pluginInterface.pPI_AddIncomingConnection = C.T_PI_AddIncomingConnection(C.PiAddIncomingConnection)
-	r_pluginInterface.pPI_AddOutgoingConnection = C.T_PI_AddOutgoingConnection(C.PiAddOutgoingConnection)
-	return C.long(1)
+	pluginInterface := (*C.struct_PluginInterface)(r_pluginInterface)
+	pluginInterface.handle = GetPlugin(plugin)
+	pluginInterface.pPI_PushAllRecords = C.T_PI_PushAllRecords(C.PiPushAllRecords)
+	pluginInterface.pPI_Close = C.T_PI_Close(C.PiClose)
+	pluginInterface.pPI_AddIncomingConnection = C.T_PI_AddIncomingConnection(C.PiAddIncomingConnection)
+	pluginInterface.pPI_AddOutgoingConnection = C.T_PI_AddOutgoingConnection(C.PiAddOutgoingConnection)
+	return 1
 }
 
 //export PiPushAllRecords
@@ -132,8 +126,8 @@ func IiFree(handle unsafe.Pointer) {
 }
 
 //export GetPlugin
-func GetPlugin() unsafe.Pointer {
-	return pointer.Save(MyPlugin)
+func GetPlugin(plugin Plugin) unsafe.Pointer {
+	return pointer.Save(plugin)
 }
 
 func OutputMessage(toolId int, status int, message string) {

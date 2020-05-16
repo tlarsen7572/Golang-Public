@@ -76,8 +76,3 @@ long IiPushRecord(void * handle, void * record);
 void IiUpdateProgress(void * handle, double percent);
 void IiClose(void * handle);
 void IiFree(void * handle);
-
-long __declspec(dllexport) AlteryxGoPlugin(int nToolID,
-	void * pXmlProperties,
-	struct EngineInterface *pEngineInterface,
-	struct PluginInterface *r_pluginInterface);
