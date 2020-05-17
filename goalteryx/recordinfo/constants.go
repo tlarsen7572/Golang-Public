@@ -1,6 +1,8 @@
 package recordinfo
 
-import "time"
+import (
+	"time"
+)
 
 var ByteType = `byte`
 var BoolType = `bool`
@@ -19,7 +21,7 @@ var DateTimeType = `datetime`
 
 var zeroDate = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
 
-type generateBytes func(field *fieldInfoEditor) ([]byte, error)
+type generateBytes func(field *fieldInfoEditor, blob []byte, startAt int) (int, error)
 
 var dateFormat = `2006-01-02`
 var dateTimeFormat = `2006-01-02 15:04:05`

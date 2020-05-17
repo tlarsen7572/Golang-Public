@@ -60,6 +60,7 @@ type recordInfo struct {
 	numFields  int
 	fields     []*fieldInfoEditor
 	fieldNames map[string]int
+	blob       []byte
 }
 
 type FieldInfo struct {
@@ -120,4 +121,12 @@ func (info *recordInfo) checkFieldName(name string) string {
 		_, exists = info.fieldNames[name]
 	}
 	return name
+}
+
+func (info *recordInfo) getRecordSize() int {
+	size := 0
+	for _, field := range info.fields {
+		size += int(field.fixedLen + field.nullByteLen)
+	}
+	return size
 }

@@ -8,18 +8,7 @@ import (
 
 func TestSetValuesAndGenerateRecord(t *testing.T) {
 	recordInfo := generateTestRecordInfo()
-	_ = recordInfo.SetByteField(`ByteField`, byte(1))
-	_ = recordInfo.SetBoolField(`BoolField`, true)
-	_ = recordInfo.SetInt16Field(`Int16Field`, 2)
-	_ = recordInfo.SetInt32Field(`Int32Field`, 3)
-	_ = recordInfo.SetInt64Field(`Int64Field`, 4)
-	_ = recordInfo.SetFixedDecimalField(`FixedDecimalField`, 123.45)
-	_ = recordInfo.SetFloatField(`FloatField`, float32(654.321))
-	_ = recordInfo.SetDoubleField(`DoubleField`, 909.33)
-	_ = recordInfo.SetStringField(`StringField`, `ABCDEFG`)
-	_ = recordInfo.SetWStringField(`WStringField`, `CXVY`)
-	_ = recordInfo.SetDateField(`DateField`, time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC))
-	_ = recordInfo.SetDateTimeField(`DateTimeField`, time.Date(2021, 3, 4, 5, 6, 7, 0, time.UTC))
+	setRecordInfoTestData(recordInfo)
 
 	record, err := recordInfo.GenerateRecord()
 	if err != nil {
@@ -65,6 +54,17 @@ func TestSetValuesAndGenerateRecord(t *testing.T) {
 	checkExpectedGetValueFrom(t, dateTimeVal, expectedDate, isNull, false, err, nil)
 }
 
+func TestCachedRecords(t *testing.T) {
+	recordInfo := generateTestRecordInfo()
+	setRecordInfoTestData(recordInfo)
+
+	record1, _ := recordInfo.GenerateRecord()
+	record2, _ := recordInfo.GenerateRecord()
+	if record1 != record2 {
+		t.Fatalf(`record1 and record2 are 2 different pointers`)
+	}
+}
+
 func generateTestRecordInfo() recordinfo.RecordInfo {
 	recordInfo := recordinfo.New()
 	recordInfo.AddByteField(`ByteField`, ``)
@@ -80,4 +80,19 @@ func generateTestRecordInfo() recordinfo.RecordInfo {
 	recordInfo.AddDateField(`DateField`, ``)
 	recordInfo.AddDateTimeField(`DateTimeField`, ``)
 	return recordInfo
+}
+
+func setRecordInfoTestData(recordInfo recordinfo.RecordInfo) {
+	_ = recordInfo.SetByteField(`ByteField`, byte(1))
+	_ = recordInfo.SetBoolField(`BoolField`, true)
+	_ = recordInfo.SetInt16Field(`Int16Field`, 2)
+	_ = recordInfo.SetInt32Field(`Int32Field`, 3)
+	_ = recordInfo.SetInt64Field(`Int64Field`, 4)
+	_ = recordInfo.SetFixedDecimalField(`FixedDecimalField`, 123.45)
+	_ = recordInfo.SetFloatField(`FloatField`, float32(654.321))
+	_ = recordInfo.SetDoubleField(`DoubleField`, 909.33)
+	_ = recordInfo.SetStringField(`StringField`, `ABCDEFG`)
+	_ = recordInfo.SetWStringField(`WStringField`, `CXVY`)
+	_ = recordInfo.SetDateField(`DateField`, time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC))
+	_ = recordInfo.SetDateTimeField(`DateTimeField`, time.Date(2021, 3, 4, 5, 6, 7, 0, time.UTC))
 }
