@@ -37,11 +37,10 @@ type ConfigXml struct {
 
 func (plugin *MyNewPlugin) Init(toolId int, config string) bool {
 	plugin.ToolId = toolId
-	api.OutputMessage(plugin.ToolId, 1, fmt.Sprintf(`Tool configuration: %v`, config))
 	var c ConfigXml
 	err := xml.Unmarshal([]byte(config), &c)
 	if err != nil {
-		api.OutputMessage(toolId, 3, err.Error())
+		api.OutputMessage(toolId, api.Error, err.Error())
 		return false
 	}
 	plugin.Field = c.Field
@@ -66,7 +65,6 @@ func (plugin *MyNewPlugin) AddOutgoingConnection(connectionName string, connecti
 	} else {
 		plugin.Blah.Add(connectionInterface)
 	}
-	api.OutputMessage(plugin.ToolId, 1, fmt.Sprintf(`Add outgoing connection: %v`, connectionName))
 	return true
 }
 
@@ -80,7 +78,7 @@ func (ii *MyPluginIncomingInterface) Init(recordInfoIn string) bool {
 	var err error
 	ii.inInfo, err = recordinfo.FromXml(recordInfoIn)
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
 	ii.blahInfo = recordinfo.New()
@@ -88,16 +86,14 @@ func (ii *MyPluginIncomingInterface) Init(recordInfoIn string) bool {
 
 	err = ii.Parent.Output1.Init(ii.inInfo)
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
 	err = ii.Parent.Blah.Init(ii.blahInfo)
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
-
-	api.OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`Incoming record info: %v`, recordInfoIn))
 	return true
 }
 
@@ -107,37 +103,37 @@ func (ii *MyPluginIncomingInterface) PushRecord(record unsafe.Pointer) bool {
 	var err error
 	value, isNull, err = ii.inInfo.GetInterfaceValueFrom(ii.Parent.Field, record)
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
 	if isNull {
-		api.OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`[%v] is null`, ii.Parent.Field))
+		api.OutputMessage(ii.Parent.ToolId, api.TransientInfo, fmt.Sprintf(`[%v] is null`, ii.Parent.Field))
 	} else {
-		api.OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`[%v] is %v`, ii.Parent.Field, value))
+		api.OutputMessage(ii.Parent.ToolId, api.TransientInfo, fmt.Sprintf(`[%v] is %v`, ii.Parent.Field, value))
 	}
 	err = ii.Parent.Output1.PushRecord(record)
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
 	byteVal, isNull, err := ii.inInfo.GetByteValueFrom(`ByteField`, record)
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
 	err = ii.blahInfo.SetByteField(`hello`, byteVal)
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
 	blahRecord, err := ii.blahInfo.GenerateRecord()
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
 	err = ii.Parent.Blah.PushRecord(blahRecord)
 	if err != nil {
-		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		api.OutputMessage(ii.Parent.ToolId, api.Error, err.Error())
 		return false
 	}
 	return true

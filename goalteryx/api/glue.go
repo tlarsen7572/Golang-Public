@@ -16,6 +16,19 @@ import (
 
 var Engine *C.struct_EngineInterface
 
+type MessageStatus int
+
+const (
+	Info                          MessageStatus = 1
+	TransientInfo                 MessageStatus = 0x40000000 | 1
+	Warning                       MessageStatus = 2
+	TransientWarning              MessageStatus = 0x40000000 | 2
+	Error                         MessageStatus = 3
+	Complete                      MessageStatus = 4
+	FieldConversionError          MessageStatus = 5
+	TransientFieldConversionError MessageStatus = 0x40000000 | 5
+)
+
 type Plugin interface {
 	Init(toolId int, config string) bool
 	PushAllRecords(recordLimit int) bool
@@ -136,7 +149,7 @@ func GetPlugin(plugin Plugin) unsafe.Pointer {
 	return pointer.Save(plugin)
 }
 
-func OutputMessage(toolId int, status int, message string) {
+func OutputMessage(toolId int, status MessageStatus, message string) {
 	cMessage, err := convert_strings.StringToWideC(message)
 	if err != nil {
 		return
@@ -149,18 +162,18 @@ func OutputMessage(toolId int, status int, message string) {
 }
 
 func BrowseEverywhereReserveAnchor(toolId int) uint {
-	printLogf(`start reserving browse everywhere anchor ID`)
+	//printLogf(`start reserving browse everywhere anchor ID`)
 	anchorId := C.callEngineBrowseEverywhereReserveAnchor(Engine, C.int(toolId))
-	printLogf(`done reserving browse everywhere anchor ID`)
-	printLogf(`returned browse everywhere anchor ID: %v`, anchorId)
+	//printLogf(`done reserving browse everywhere anchor ID`)
+	//printLogf(`returned browse everywhere anchor ID: %v`, anchorId)
 	return uint(anchorId)
 }
 
 func BrowseEverywhereGetII(browseEverywhereReservationId uint, toolId int, name string) *ConnectionInterfaceStruct {
-	printLogf(`start getting browse everywhere II`)
+	//printLogf(`start getting browse everywhere II`)
 	cName, _ := convert_strings.StringToWideC(name)
 	ii := C.callEngineBrowseEverywhereGetII(Engine, C.unsigned(browseEverywhereReservationId), C.int(toolId), cName)
-	printLogf(`done getting browse everywhere II`)
+	//printLogf(`done getting browse everywhere II`)
 	return &ConnectionInterfaceStruct{connection: ii}
 }
 
