@@ -15,14 +15,13 @@ import (
 )
 
 var Engine *C.struct_EngineInterface
-var outputConnections = map[string][]*C.struct_IncomingConnectionInterface{}
 
 type Plugin interface {
 	Init(toolId int, config string) bool
 	PushAllRecords(recordLimit int) bool
 	Close(hasErrors bool)
 	AddIncomingConnection(connectionType string, connectionName string) IncomingInterface
-	AddOutgoingConnection(connectionName string) bool
+	AddOutgoingConnection(connectionName string, connectionInterface *ConnectionInterfaceStruct) bool
 }
 
 type IncomingInterface interface {
@@ -31,6 +30,10 @@ type IncomingInterface interface {
 	UpdateProgress(percent float64)
 	Close()
 	Free()
+}
+
+type ConnectionInterfaceStruct struct {
+	connection *C.struct_IncomingConnectionInterface
 }
 
 func ConfigurePlugin(plugin Plugin, toolId int, pXmlProperties unsafe.Pointer, pEngineInterface unsafe.Pointer, r_pluginInterface unsafe.Pointer) int {
@@ -84,13 +87,8 @@ func PiAddIncomingConnection(handle unsafe.Pointer, connectionType unsafe.Pointe
 func PiAddOutgoingConnection(handle unsafe.Pointer, connectionName unsafe.Pointer, incomingConnection *C.struct_IncomingConnectionInterface) C.long {
 	alteryxPlugin := pointer.Restore(handle).(Plugin)
 	goName := convert_strings.WideCToString(connectionName)
-	if alteryxPlugin.AddOutgoingConnection(goName) {
-		conns, ok := outputConnections[goName]
-		if ok {
-			outputConnections[goName] = append(conns, incomingConnection)
-		} else {
-			outputConnections[goName] = []*C.struct_IncomingConnectionInterface{incomingConnection}
-		}
+	connectionInterface := &ConnectionInterfaceStruct{connection: incomingConnection}
+	if alteryxPlugin.AddOutgoingConnection(goName, connectionInterface) {
 		return C.long(1)
 	}
 	return C.long(0)
@@ -150,38 +148,42 @@ func OutputMessage(toolId int, status int, message string) {
 	C.callEngineOutputMessage(Engine, C.int(toolId), C.int(status), cMessage)
 }
 
-func InitOutput(output string, recordInfo recordinfo.RecordInfo) error {
-	recordInfoXml, err := recordInfo.ToXml(output)
+func BrowseEverywhereReserveAnchor(toolId int) uint {
+	printLogf(`start reserving browse everywhere anchor ID`)
+	anchorId := C.callEngineBrowseEverywhereReserveAnchor(Engine, C.int(toolId))
+	printLogf(`done reserving browse everywhere anchor ID`)
+	printLogf(`returned browse everywhere anchor ID: %v`, anchorId)
+	return uint(anchorId)
+}
+
+func BrowseEverywhereGetII(browseEverywhereReservationId uint, toolId int, name string) *ConnectionInterfaceStruct {
+	printLogf(`start getting browse everywhere II`)
+	cName, _ := convert_strings.StringToWideC(name)
+	ii := C.callEngineBrowseEverywhereGetII(Engine, C.unsigned(browseEverywhereReservationId), C.int(toolId), cName)
+	printLogf(`done getting browse everywhere II`)
+	return &ConnectionInterfaceStruct{connection: ii}
+}
+
+func InitOutput(connection *ConnectionInterfaceStruct, name string, recordInfo recordinfo.RecordInfo) error {
+	recordInfoXml, err := recordInfo.ToXml(name)
 	if err != nil {
-		return fmt.Errorf(`error intializing output connection '%v': %v`, output, err.Error())
+		return fmt.Errorf(`error intializing output connection '%v': %v`, name, err.Error())
 	}
 	cRecordInfoXml, err := convert_strings.StringToWideC(recordInfoXml)
 	if err != nil {
-		return fmt.Errorf(`error initializing output connection '%v': %v`, output, err.Error())
+		return fmt.Errorf(`error initializing output connection '%v': %v`, name, err.Error())
 	}
-	connections, ok := outputConnections[output]
-	if !ok {
-		return fmt.Errorf(`error initializing output connection: output '%v' does not exist`, output)
-	}
-	for index, connection := range connections {
-		result := C.callInitOutput(connection, cRecordInfoXml)
-		if result == C.long(0) {
-			return fmt.Errorf(`error calling pII_InitOutput on output '%v', connection %v`, output, index)
-		}
+	result := C.callInitOutput(connection.connection, cRecordInfoXml)
+	if result == C.long(0) {
+		return fmt.Errorf(`error calling pII_InitOutput on output '%v'`, name)
 	}
 	return nil
 }
 
-func PushRecord(output string, record unsafe.Pointer) error {
-	connections, ok := outputConnections[output]
-	if !ok {
-		return fmt.Errorf(`error pushing record: output '%v' does not exist`, output)
-	}
-	for index, connection := range connections {
-		result := C.callPushRecord(connection, record)
-		if result == C.long(0) {
-			return fmt.Errorf(`error calling pII_PushRecord on output '%v', connection %v`, output, index)
-		}
+func PushRecord(connection *ConnectionInterfaceStruct, record unsafe.Pointer) error {
+	result := C.callPushRecord(connection.connection, record)
+	if result == C.long(0) {
+		return fmt.Errorf(`error calling pII_PushRecord`)
 	}
 	return nil
 }

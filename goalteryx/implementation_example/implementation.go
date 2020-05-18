@@ -8,6 +8,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/tlarsen7572/Golang-Public/goalteryx/api"
+	"github.com/tlarsen7572/Golang-Public/goalteryx/output_connection"
 	"github.com/tlarsen7572/Golang-Public/goalteryx/recordinfo"
 	"unsafe"
 )
@@ -16,13 +17,18 @@ func main() {}
 
 //export AlteryxGoPlugin
 func AlteryxGoPlugin(toolId C.int, xmlProperties unsafe.Pointer, engineInterface unsafe.Pointer, pluginInterface unsafe.Pointer) C.long {
-	myPlugin := &MyNewPlugin{}
+	myPlugin := &MyNewPlugin{
+		Output1: output_connection.New(int(toolId), `Output1`),
+		Blah:    output_connection.New(int(toolId), `Blah`),
+	}
 	return C.long(api.ConfigurePlugin(myPlugin, int(toolId), xmlProperties, engineInterface, pluginInterface))
 }
 
 type MyNewPlugin struct {
-	ToolId int
-	Field  string
+	ToolId  int
+	Field   string
+	Output1 output_connection.OutputConnection
+	Blah    output_connection.OutputConnection
 }
 
 type ConfigXml struct {
@@ -51,38 +57,51 @@ func (plugin *MyNewPlugin) Close(hasErrors bool) {
 }
 
 func (plugin *MyNewPlugin) AddIncomingConnection(connectionType string, connectionName string) api.IncomingInterface {
-	return &MyNewIncomingInterface{Parent: plugin}
+	return &MyPluginIncomingInterface{Parent: plugin}
 }
 
-func (plugin *MyNewPlugin) AddOutgoingConnection(connectionName string) bool {
+func (plugin *MyNewPlugin) AddOutgoingConnection(connectionName string, connectionInterface *api.ConnectionInterfaceStruct) bool {
+	if connectionName == `Output1` {
+		plugin.Output1.Add(connectionInterface)
+	} else {
+		plugin.Blah.Add(connectionInterface)
+	}
 	api.OutputMessage(plugin.ToolId, 1, fmt.Sprintf(`Add outgoing connection: %v`, connectionName))
 	return true
 }
 
-type MyNewIncomingInterface struct {
-	Parent *MyNewPlugin
-	inInfo recordinfo.RecordInfo
+type MyPluginIncomingInterface struct {
+	Parent   *MyNewPlugin
+	inInfo   recordinfo.RecordInfo
+	blahInfo recordinfo.RecordInfo
 }
 
-func (ii *MyNewIncomingInterface) Init(recordInfoIn string) bool {
+func (ii *MyPluginIncomingInterface) Init(recordInfoIn string) bool {
 	var err error
 	ii.inInfo, err = recordinfo.FromXml(recordInfoIn)
 	if err != nil {
 		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
 		return false
 	}
-	for _, connection := range []string{`Output1`, `Blah`} {
-		err = api.InitOutput(connection, ii.inInfo)
-		if err != nil {
-			api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
-			return false
-		}
+	ii.blahInfo = recordinfo.New()
+	ii.blahInfo.AddByteField(`hello`, `goalteryx`)
+
+	err = ii.Parent.Output1.Init(ii.inInfo)
+	if err != nil {
+		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
 	}
+	err = ii.Parent.Blah.Init(ii.blahInfo)
+	if err != nil {
+		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
+	}
+
 	api.OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`Incoming record info: %v`, recordInfoIn))
 	return true
 }
 
-func (ii *MyNewIncomingInterface) PushRecord(record unsafe.Pointer) bool {
+func (ii *MyPluginIncomingInterface) PushRecord(record unsafe.Pointer) bool {
 	var value interface{}
 	var isNull bool
 	var err error
@@ -96,23 +115,42 @@ func (ii *MyNewIncomingInterface) PushRecord(record unsafe.Pointer) bool {
 	} else {
 		api.OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`[%v] is %v`, ii.Parent.Field, value))
 	}
-	for _, connection := range []string{`Output1`, `Blah`} {
-		err = api.PushRecord(connection, record)
-		if err != nil {
-			api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
-		}
+	err = ii.Parent.Output1.PushRecord(record)
+	if err != nil {
+		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
+	}
+	byteVal, isNull, err := ii.inInfo.GetByteValueFrom(`ByteField`, record)
+	if err != nil {
+		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
+	}
+	err = ii.blahInfo.SetByteField(`hello`, byteVal)
+	if err != nil {
+		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
+	}
+	blahRecord, err := ii.blahInfo.GenerateRecord()
+	if err != nil {
+		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
+	}
+	err = ii.Parent.Blah.PushRecord(blahRecord)
+	if err != nil {
+		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		return false
 	}
 	return true
 }
 
-func (ii *MyNewIncomingInterface) UpdateProgress(percent float64) {
+func (ii *MyPluginIncomingInterface) UpdateProgress(percent float64) {
 
 }
 
-func (ii *MyNewIncomingInterface) Close() {
+func (ii *MyPluginIncomingInterface) Close() {
 
 }
 
-func (ii *MyNewIncomingInterface) Free() {
+func (ii *MyPluginIncomingInterface) Free() {
 
 }

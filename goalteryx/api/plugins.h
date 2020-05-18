@@ -51,6 +51,8 @@ typedef void AlteryxThreadProc(void *pData);
 struct PreSortConnectionInterface;
 typedef long ( _stdcall * OutputToolProgress)(void * handle, int nToolID, double dPercentProgress);
 typedef long ( _stdcall * OutputMessage)(void * handle, int nToolID, int nStatus, wchar_t *pMessage);
+typedef unsigned ( _stdcall * BrowseEverywhereReserveAnchor)(void * handle, int nToolId);
+typedef struct IncomingConnectionInterface* ( _stdcall * BrowseEverywhereGetII)(void * handle, unsigned nReservationId,  int nToolId, void * strOutputName);
 
 struct EngineInterface {
     int sizeof_EngineInterface;
@@ -59,6 +61,8 @@ struct EngineInterface {
 
     OutputToolProgress pOutputToolProgress;
     OutputMessage pOutputMessage;
+    BrowseEverywhereReserveAnchor pBrowseEverywhereReserveAnchor;
+    BrowseEverywhereGetII pBrowseEverywhereGetII;
 };
 
 // For the glue
@@ -66,6 +70,8 @@ struct EngineInterface {
 void * GetPlugin();
 typedef long (*outputFunc)(int nToolID, int nStatus, void * pMessage);
 void callEngineOutputMessage(struct EngineInterface *pEngineInterface, int toolId, int status, void * message);
+unsigned callEngineBrowseEverywhereReserveAnchor(struct EngineInterface *pEngineInterface, int toolId);
+struct IncomingConnectionInterface* callEngineBrowseEverywhereGetII(struct EngineInterface *pEngineInterface, unsigned browseEverywhereAnchorId, int toolId, void * name);
 
 long PiPushAllRecords(void * handle, __int64 recordLimit);
 void PiClose(void * handle, bool hasErrors);
@@ -77,5 +83,5 @@ void IiUpdateProgress(void * handle, double percent);
 void IiClose(void * handle);
 void IiFree(void * handle);
 
-long callInitOutput(struct IncomingConnectionInterface *connection, void * recordMetaInfoXml);
-long callPushRecord(struct IncomingConnectionInterface *connection, void * record);
+long callInitOutput(struct IncomingConnectionInterface * connection, void * recordMetaInfoXml);
+long callPushRecord(struct IncomingConnectionInterface * connection, void * record);
