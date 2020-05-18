@@ -4,11 +4,12 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 type xmlMetaInfo struct {
-	Fields []*xmlField `xml:"RecordInfo>Field"`
+	XMLName    string      `xml:"MetaInfo"`
+	Connection string      `xml:"connection,attr"`
+	Fields     []*xmlField `xml:"RecordInfo>Field"`
 }
 
 type xmlField struct {
@@ -27,7 +28,7 @@ func FromXml(recordInfoXml string) (RecordInfo, error) {
 	}
 	recordInfo := New()
 	for index, field := range metaInfo.Fields {
-		switch strings.ToLower(field.Type) {
+		switch field.Type {
 		case ByteType:
 			recordInfo.AddByteField(field.Name, field.Source)
 		case BoolType:
@@ -85,4 +86,23 @@ func FromXml(recordInfoXml string) (RecordInfo, error) {
 		}
 	}
 	return recordInfo, nil
+}
+
+func (info *recordInfo) ToXml(connection string) (string, error) {
+	fields := make([]*xmlField, 0)
+	for _, field := range info.fields {
+		fields = append(fields, &xmlField{
+			Name:   field.Name,
+			Source: field.Source,
+			Size:   strconv.Itoa(field.Size),
+			Scale:  strconv.Itoa(field.Precision),
+			Type:   field.Type,
+		})
+	}
+	recordInfo := xmlMetaInfo{XMLName: `MetaInfo`, Connection: connection, Fields: fields}
+	metaInfo, err := xml.Marshal(recordInfo)
+	if err != nil {
+		return ``, fmt.Errorf(`error converting recordinfo to xml: %v`, err.Error())
+	}
+	return string(metaInfo), nil
 }

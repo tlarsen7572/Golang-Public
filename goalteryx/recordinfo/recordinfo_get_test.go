@@ -56,6 +56,20 @@ func TestInstantiateRecordInfoFromXml(t *testing.T) {
 	}
 }
 
+func TestSaveRecordInfoToXml(t *testing.T) {
+	recordInfo, _ := recordinfo.FromXml(recordInfoXml)
+	xmlConfig, err := recordInfo.ToXml(`Output`)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+
+	expectedXml := `<MetaInfo connection="Output"><RecordInfo><Field name="ByteField" source="TextInput:" size="1" scale="0" type="Byte"></Field><Field name="BoolField" source="Formula: 1" size="1" scale="0" type="Bool"></Field><Field name="Int16Field" source="Formula: 16" size="2" scale="0" type="Int16"></Field><Field name="Int32Field" source="Formula: 32" size="4" scale="0" type="Int32"></Field><Field name="Int64Field" source="Formula: 64" size="8" scale="0" type="Int64"></Field><Field name="FixedDecimalField" source="Formula: 123.45" size="19" scale="6" type="FixedDecimal"></Field><Field name="FloatField" source="Formula: 678.9" size="4" scale="0" type="Float"></Field><Field name="DoubleField" source="Formula: 0.12345" size="8" scale="0" type="Double"></Field><Field name="StringField" source="Formula: &#34;A&#34;" size="64" scale="0" type="String"></Field><Field name="WStringField" source="Formula: &#34;AB&#34;" size="64" scale="0" type="WString"></Field><Field name="V_StringShortField" source="Formula: &#34;ABC&#34;" size="1000" scale="0" type="V_String"></Field><Field name="V_StringLongField" source="Formula: PadLeft(&#34;&#34;, 500, &#39;B&#39;)" size="2147483647" scale="0" type="V_String"></Field><Field name="V_WStringShortField" source="Formula: &#34;XZY&#34;" size="10" scale="0" type="V_WString"></Field><Field name="V_WStringLongField" source="Formula: PadLeft(&#34;&#34;, 500, &#39;W&#39;)" size="1073741823" scale="0" type="V_WString"></Field><Field name="DateField" source="Formula: &#39;2020-01-01&#39;" size="10" scale="0" type="Date"></Field><Field name="DateTimeField" source="Formula: &#39;2020-02-03 04:05:06&#39;" size="19" scale="0" type="DateTime"></Field></RecordInfo></MetaInfo>`
+	if xmlConfig != expectedXml {
+		t.Fatalf("expected:\n%v\nbut got:\n%v", expectedXml, xmlConfig)
+	}
+	t.Logf(xmlConfig)
+}
+
 func TestCorrectlyRetrieveByteValue(t *testing.T) {
 	recordInfo, err := recordinfo.FromXml(recordInfoXml)
 	if err != nil {

@@ -8,12 +8,14 @@ import (
 	"fmt"
 	"github.com/mattn/go-pointer"
 	"github.com/tlarsen7572/Golang-Public/goalteryx/convert_strings"
+	"github.com/tlarsen7572/Golang-Public/goalteryx/recordinfo"
 	"os"
 	"time"
 	"unsafe"
 )
 
 var Engine *C.struct_EngineInterface
+var outputConnections = map[string][]*C.struct_IncomingConnectionInterface{}
 
 type Plugin interface {
 	Init(toolId int, config string) bool
@@ -83,6 +85,12 @@ func PiAddOutgoingConnection(handle unsafe.Pointer, connectionName unsafe.Pointe
 	alteryxPlugin := pointer.Restore(handle).(Plugin)
 	goName := convert_strings.WideCToString(connectionName)
 	if alteryxPlugin.AddOutgoingConnection(goName) {
+		conns, ok := outputConnections[goName]
+		if ok {
+			outputConnections[goName] = append(conns, incomingConnection)
+		} else {
+			outputConnections[goName] = []*C.struct_IncomingConnectionInterface{incomingConnection}
+		}
 		return C.long(1)
 	}
 	return C.long(0)
@@ -140,6 +148,42 @@ func OutputMessage(toolId int, status int, message string) {
 	}
 
 	C.callEngineOutputMessage(Engine, C.int(toolId), C.int(status), cMessage)
+}
+
+func InitOutput(output string, recordInfo recordinfo.RecordInfo) error {
+	recordInfoXml, err := recordInfo.ToXml(output)
+	if err != nil {
+		return fmt.Errorf(`error intializing output connection '%v': %v`, output, err.Error())
+	}
+	cRecordInfoXml, err := convert_strings.StringToWideC(recordInfoXml)
+	if err != nil {
+		return fmt.Errorf(`error initializing output connection '%v': %v`, output, err.Error())
+	}
+	connections, ok := outputConnections[output]
+	if !ok {
+		return fmt.Errorf(`error initializing output connection: output '%v' does not exist`, output)
+	}
+	for index, connection := range connections {
+		result := C.callInitOutput(connection, cRecordInfoXml)
+		if result == C.long(0) {
+			return fmt.Errorf(`error calling pII_InitOutput on output '%v', connection %v`, output, index)
+		}
+	}
+	return nil
+}
+
+func PushRecord(output string, record unsafe.Pointer) error {
+	connections, ok := outputConnections[output]
+	if !ok {
+		return fmt.Errorf(`error pushing record: output '%v' does not exist`, output)
+	}
+	for index, connection := range connections {
+		result := C.callPushRecord(connection, record)
+		if result == C.long(0) {
+			return fmt.Errorf(`error calling pII_PushRecord on output '%v', connection %v`, output, index)
+		}
+	}
+	return nil
 }
 
 func printLogf(message string, args ...interface{}) {

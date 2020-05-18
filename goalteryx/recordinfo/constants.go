@@ -4,20 +4,20 @@ import (
 	"time"
 )
 
-var ByteType = `byte`
-var BoolType = `bool`
-var Int16Type = `int16`
-var Int32Type = `int32`
-var Int64Type = `int64`
-var FixedDecimalType = `fixeddecimal`
-var FloatType = `float`
-var DoubleType = `double`
-var StringType = `string`
-var WStringType = `wstring`
-var V_StringType = `v_string`
-var V_WStringType = `v_wstring`
-var DateType = `date`
-var DateTimeType = `datetime`
+var ByteType = `Byte`
+var BoolType = `Bool`
+var Int16Type = `Int16`
+var Int32Type = `Int32`
+var Int64Type = `Int64`
+var FixedDecimalType = `FixedDecimal`
+var FloatType = `Float`
+var DoubleType = `Double`
+var StringType = `String`
+var WStringType = `WString`
+var V_StringType = `V_String`
+var V_WStringType = `V_WString`
+var DateType = `Date`
+var DateTimeType = `DateTime`
 
 var zeroDate = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
 

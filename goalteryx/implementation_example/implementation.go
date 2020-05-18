@@ -71,6 +71,13 @@ func (ii *MyNewIncomingInterface) Init(recordInfoIn string) bool {
 		api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
 		return false
 	}
+	for _, connection := range []string{`Output1`, `Blah`} {
+		err = api.InitOutput(connection, ii.inInfo)
+		if err != nil {
+			api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+			return false
+		}
+	}
 	api.OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`Incoming record info: %v`, recordInfoIn))
 	return true
 }
@@ -88,6 +95,12 @@ func (ii *MyNewIncomingInterface) PushRecord(record unsafe.Pointer) bool {
 		api.OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`[%v] is null`, ii.Parent.Field))
 	} else {
 		api.OutputMessage(ii.Parent.ToolId, 1, fmt.Sprintf(`[%v] is %v`, ii.Parent.Field, value))
+	}
+	for _, connection := range []string{`Output1`, `Blah`} {
+		err = api.PushRecord(connection, record)
+		if err != nil {
+			api.OutputMessage(ii.Parent.ToolId, 3, err.Error())
+		}
 	}
 	return true
 }

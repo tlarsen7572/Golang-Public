@@ -53,6 +53,7 @@ type RecordInfo interface {
 	SetFieldNull(fieldName string) error
 
 	GenerateRecord() (unsafe.Pointer, error)
+	ToXml(connection string) (string, error)
 }
 
 type recordInfo struct {
